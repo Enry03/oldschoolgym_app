@@ -1,3 +1,4 @@
+import { PushToggle } from '../../components/PushCard'
 import { motion } from 'framer-motion'
 import { Bell, Camera, ChevronRight, CreditCard, Download, FileHeart, Gift, KeyRound, LogOut, MessageCircle, Newspaper, Shield, Trash2, Upload } from 'lucide-react'
 import { useEffect, useState, type ReactNode } from 'react'
@@ -93,6 +94,7 @@ export default function Profile() {
       <div className="card divide-y divide-line/40 overflow-hidden p-0">
         <Row icon={<CreditCard className="size-5" />} label="Abbonamento e ricevute" to="/app/abbonamento" />
         <Row icon={<Bell className="size-5" />} label="Notifiche" to="/app/notifiche" />
+        <PushToggle />
         <Row icon={<MessageCircle className="size-5" />} label="Messaggi con il trainer" to="/app/messaggi" />
         <Row icon={<Newspaper className="size-5" />} label="Bacheca news" to="/app/news" />
         <Row icon={<Gift className="size-5" />} label="Porta un amico" to="/app/invita" />

@@ -9,7 +9,7 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icons/*.png'],
+      includeAssets: ['icons/*.png', 'push-sw.js'],
       manifest: {
         name: 'OldSchool Gym Pineto',
         short_name: 'OldSchool',
@@ -29,6 +29,7 @@ export default defineConfig({
       },
       workbox: {
         navigateFallback: '/index.html',
+        importScripts: ['/push-sw.js'],
         globPatterns: ['**/*.{js,css,html,webp,png,svg,woff2}'],
         runtimeCaching: [
           {

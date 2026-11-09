@@ -1,3 +1,4 @@
+import { PushBanner } from '../../components/PushCard'
 import { motion } from 'framer-motion'
 import { AlertTriangle, Bell, CalendarClock, FileWarning, ScanLine, UserPlus, Users, Wallet } from 'lucide-react'
 import { lazy, Suspense } from 'react'
@@ -41,6 +42,7 @@ export default function StaffDashboard() {
 
   return (
     <div>
+      <PushBanner />
       <div className="mb-6 flex items-center gap-3">
         <div className="min-w-0 flex-1">
           <div className="text-sm text-muted">{greeting()},</div>

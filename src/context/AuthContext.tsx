@@ -1,3 +1,4 @@
+import { forgetPushOnLogout, syncPush } from '../lib/push'
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
@@ -31,6 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     const { data } = await supabase.from('profiles').select('*').eq('id', uid).maybeSingle()
     setProfile((data as Profile) ?? null)
+    if (data) void syncPush(uid)
   }, [])
 
   const refreshSettings = useCallback(async () => {
@@ -70,6 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     refreshProfile: () => loadProfile(session?.user.id),
     refreshSettings,
     signOut: async () => {
+      await forgetPushOnLogout()
       await supabase.auth.signOut()
       setProfile(null)
     },

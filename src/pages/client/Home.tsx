@@ -1,3 +1,4 @@
+import { PushBanner } from '../../components/PushCard'
 import { motion } from 'framer-motion'
 import { AlertTriangle, Bell, CalendarPlus, ChevronRight, Dumbbell, Gift, LineChart, MessageCircle, Newspaper, Users } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
@@ -72,6 +73,7 @@ export default function ClientHome() {
       </div>
 
       {/* Avvisi */}
+      <PushBanner />
       {cert === null || (certDays !== null && certDays < 15) ? (
         <motion.button initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} onClick={() => nav('/app/profilo#certificato')} className="mb-4 flex w-full items-center gap-3 rounded-2xl border border-danger/40 bg-danger/10 p-3 text-left">
           <AlertTriangle className="size-5 shrink-0 text-danger" />
