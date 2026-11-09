@@ -57,7 +57,19 @@ revoke execute on function private.push_notification() from public, anon, authen
 create trigger push_on_notification after insert on public.notifications
   for each row execute function private.push_notification();
 
--- Configurazione da eseguire una volta (valori fuori dal repository):
--- insert into private.app_config values
+-- Lettura della configurazione solo per la edge function (service role)
+create or replace function public.push_config()
+returns jsonb language sql stable security definer set search_path = '' as $$
+  select jsonb_object_agg(key, value) from private.app_config
+  where key in ('push_hook_secret','vapid_public_key','vapid_private_key','vapid_subject')
+$$;
+revoke execute on function public.push_config() from public, anon, authenticated;
+grant execute on function public.push_config() to service_role;
+
+-- Valori da inserire una volta, fuori dal repository:
+-- insert into private.app_config(key, value) values
 --   ('push_function_url', 'https://<ref>.supabase.co/functions/v1/send-push'),
---   ('push_hook_secret', '<segreto casuale, uguale al secret PUSH_HOOK_SECRET della funzione>');
+--   ('push_hook_secret', '<segreto casuale>'),
+--   ('vapid_public_key', '<chiave pubblica VAPID, uguale a VITE_VAPID_PUBLIC_KEY>'),
+--   ('vapid_private_key', '<chiave privata VAPID>'),
+--   ('vapid_subject', 'mailto:<email>');

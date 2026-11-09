@@ -1,5 +1,5 @@
 // Invia una notifica dell'app sui telefoni dell'utente (Web Push).
-// Chiamata solo dal database (trigger su public.notifications) con un segreto condiviso.
+// Chiamata solo dal database (trigger su public.notifications) con un segreto condiviso letto da private.app_config.
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import webpush from 'npm:web-push@3.6.7'
 
@@ -15,7 +15,12 @@ function safeEqual(a: string, b: string) {
 
 Deno.serve(async (req) => {
   if (req.method !== 'POST') return json({ error: 'Metodo non consentito' }, 405)
-  const secret = Deno.env.get('PUSH_HOOK_SECRET') ?? ''
+  const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  })
+  // chiavi e segreto stanno nel database (schema privato), leggibili solo con la service role
+  const { data: cfg } = await db.rpc('push_config')
+  const secret = (cfg?.push_hook_secret as string) ?? ''
   if (!secret || !safeEqual(req.headers.get('x-push-secret') ?? '', secret)) return json({ error: 'Non autorizzato' }, 401)
 
   let id = ''
@@ -26,14 +31,7 @@ Deno.serve(async (req) => {
   }
   if (!/^[0-9a-f-]{36}$/i.test(id)) return json({ error: 'Richiesta non valida' }, 400)
 
-  webpush.setVapidDetails(
-    Deno.env.get('VAPID_SUBJECT') ?? 'mailto:info@oldschoolgympineto.it',
-    Deno.env.get('VAPID_PUBLIC_KEY')!,
-    Deno.env.get('VAPID_PRIVATE_KEY')!,
-  )
-  const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  })
+  webpush.setVapidDetails(cfg.vapid_subject ?? 'mailto:info@oldschoolgympineto.it', cfg.vapid_public_key, cfg.vapid_private_key)
 
   const { data: n } = await db.from('notifications').select('id, user_id, title, body, link, kind').eq('id', id).maybeSingle()
   if (!n) return json({ ok: true, sent: 0 })
