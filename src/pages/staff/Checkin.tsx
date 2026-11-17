@@ -97,7 +97,7 @@ export default function Checkin() {
 
   return (
     <div>
-      <PageHeader title="Check-in" kicker="Scansiona il QR del cliente" />
+      <PageHeader title="Check-in" kicker="Pass personale del cliente o ricerca manuale" />
       <div className="relative mx-auto aspect-square max-w-sm overflow-hidden rounded-3xl bg-night">
         <video ref={videoRef} className={`size-full object-cover ${on ? '' : 'hidden'}`} muted playsInline />
         {!on && (

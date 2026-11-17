@@ -13,6 +13,9 @@ const ClientCalendar = lazy(() => import('./pages/client/Calendar'))
 const Training = lazy(() => import('./pages/client/Training'))
 const MembershipPage = lazy(() => import('./pages/client/Membership'))
 const QrPass = lazy(() => import('./pages/client/QrPass'))
+const Enter = lazy(() => import('./pages/client/Enter'))
+const Kiosk = lazy(() => import('./pages/kiosk/Kiosk'))
+const Tablets = lazy(() => import('./pages/staff/Tablets'))
 const Profile = lazy(() => import('./pages/client/Profile'))
 const Social = {
   Notifications: lazy(() => import('./pages/client/Social').then((m) => ({ default: m.NotificationsPage }))),
@@ -51,6 +54,7 @@ export default function App() {
             <Route path="/nuova-password" element={<UpdatePassword />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/cookie" element={<CookiePolicy />} />
+            <Route path="/kiosk" element={<Kiosk />} />
 
             <Route element={<RequireAuth />}>
               <Route path="/app" element={<ClientLayout />}>
@@ -59,6 +63,7 @@ export default function App() {
                 <Route path="allenamento" element={<Training />} />
                 <Route path="schede" element={<Navigate to="/app/allenamento" replace />} />
                 <Route path="abbonamento" element={<MembershipPage />} />
+                <Route path="entra" element={<Enter />} />
                 <Route path="qr" element={<QrPass />} />
                 <Route path="profilo" element={<Profile />} />
                 <Route path="notifiche" element={<Social.Notifications />} />
@@ -76,6 +81,7 @@ export default function App() {
                 <Route path="clienti/:id" element={<ClientDetail />} />
                 <Route path="calendario" element={<StaffCalendar />} />
                 <Route path="checkin" element={<Checkin />} />
+                <Route path="tablet" element={<Tablets />} />
                 <Route path="schede" element={<Workouts />} />
                 <Route path="altro" element={<More />} />
                 <Route path="comunicazioni" element={<Comms />} />

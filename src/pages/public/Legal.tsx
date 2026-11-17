@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { Cookie } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { Button, PageHeader } from '../../components/ui'
 import { useAuth } from '../../context/AuthContext'
 
@@ -46,6 +46,7 @@ export function CookiePolicy() {
 }
 
 export function CookieBanner() {
+  const { pathname } = useLocation()
   const [show, setShow] = useState(false)
   useEffect(() => {
     try {
@@ -64,7 +65,7 @@ export function CookieBanner() {
   }
   return (
     <AnimatePresence>
-      {show && (
+      {show && pathname !== '/kiosk' && (
         <motion.div initial={{ y: 120, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 120, opacity: 0 }} className="fixed inset-x-3 bottom-24 z-[60] mx-auto max-w-md rounded-2xl border border-line bg-night/95 p-4 shadow-2xl backdrop-blur md:bottom-6">
           <div className="flex gap-3">
             <Cookie className="size-6 shrink-0 text-gold" />
