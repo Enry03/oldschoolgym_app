@@ -32,7 +32,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     const { data } = await supabase.from('profiles').select('*').eq('id', uid).maybeSingle()
     setProfile((data as Profile) ?? null)
-    if (data) void syncPush(uid)
+    // le notifiche push si attivano solo dopo l'approvazione dell'iscrizione
+    if (data && (data as Profile).approval_status === 'approved') void syncPush(uid)
   }, [])
 
   const refreshSettings = useCallback(async () => {

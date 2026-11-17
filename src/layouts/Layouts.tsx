@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 import { AnimatePresence, motion } from 'framer-motion'
-import { CalendarDays, Dumbbell, Home, LayoutDashboard, LogOut, Menu, QrCode, ScanLine, User, Users } from 'lucide-react'
-import type { ReactNode } from 'react'
+import { CalendarDays, Clock3, RefreshCw, ShieldX, Dumbbell, Home, LayoutDashboard, LogOut, Menu, QrCode, ScanLine, User, Users } from 'lucide-react'
+import { useEffect, type ReactNode } from 'react'
 import { NavLink, Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { Avatar, Logo, Spinner } from '../components/ui'
 import { useAuth } from '../context/AuthContext'
@@ -113,6 +113,7 @@ export function RequireAuth({ staff }: { staff?: boolean }) {
   if (loading || (session && !profile)) return <Spinner />
   if (!session) return <Navigate to="/accedi" replace state={{ from: loc.pathname }} />
   if (staff && !isStaff) return <Navigate to="/app" replace />
+  if (profile && profile.approval_status !== 'approved') return <PendingApproval />
   if (profile && !profile.is_active) {
     return (
       <div className="grid min-h-dvh place-items-center p-8 text-center">
@@ -125,6 +126,66 @@ export function RequireAuth({ staff }: { staff?: boolean }) {
     )
   }
   return <Outlet />
+}
+
+// Schermata per chi si è registrato e aspetta l'ok della palestra (o è stato rifiutato).
+// Il blocco vero è nel database: qui si spiega solo cosa succede.
+function PendingApproval() {
+  const { profile, refreshProfile, signOut, settings } = useAuth()
+  const nav = useNavigate()
+  const rejected = profile?.approval_status === 'rejected'
+  useEffect(() => {
+    if (rejected) return
+    const t = setInterval(() => void refreshProfile(), 30000)
+    const onFocus = () => void refreshProfile()
+    window.addEventListener('focus', onFocus)
+    return () => {
+      clearInterval(t)
+      window.removeEventListener('focus', onFocus)
+    }
+  }, [rejected, refreshProfile])
+  const Icon = rejected ? ShieldX : Clock3
+  return (
+    <div className="grid min-h-dvh place-items-center p-8 text-center">
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="max-w-sm">
+        <Logo size={90} className="mx-auto mb-6" />
+        <div className={clsx('mx-auto mb-4 grid size-14 place-items-center rounded-full', rejected ? 'bg-danger/15 text-danger' : 'bg-gold/15 text-gold')}>
+          <Icon className="size-7" />
+        </div>
+        <h1 className="font-display text-3xl uppercase">{rejected ? 'Iscrizione non approvata' : 'Iscrizione in attesa'}</h1>
+        {rejected ? (
+          <>
+            <p className="mt-2 text-muted">La palestra non ha approvato questa iscrizione.</p>
+            {profile?.rejection_reason && <p className="mt-2 text-sm text-cream/80">Motivo: {profile.rejection_reason}</p>}
+            <p className="mt-2 text-muted">Per chiarimenti passa in reception{settings?.phone ? ` o chiama il ${settings.phone}` : ''}.</p>
+          </>
+        ) : (
+          <>
+            <p className="mt-2 text-muted">
+              Ciao {profile?.first_name || 'campione'}, abbiamo ricevuto la tua richiesta. La palestra deve approvarla prima che tu possa usare l'app: prenotazioni, schede e ingresso si sbloccano subito dopo.
+            </p>
+            <p className="mt-2 text-sm text-muted">Di solito basta passare in reception con un documento.</p>
+          </>
+        )}
+        <div className="mt-6 flex flex-col gap-2">
+          {!rejected && (
+            <button className="flex items-center justify-center gap-2 rounded-xl bg-gold px-4 py-3 font-semibold text-ink active:scale-95" onClick={() => void refreshProfile()}>
+              <RefreshCw className="size-4" /> Controlla di nuovo
+            </button>
+          )}
+          <button
+            className="rounded-xl px-4 py-3 text-sm font-semibold text-muted hover:text-cream"
+            onClick={async () => {
+              await signOut()
+              nav('/')
+            }}
+          >
+            Esci
+          </button>
+        </div>
+      </motion.div>
+    </div>
+  )
 }
 
 const clientItems: NavItem[] = [

@@ -17,8 +17,8 @@ Deno.serve(async (req) => {
   const { data: u, error: uErr } = await admin.auth.getUser(token)
   if (uErr || !u.user) return json({ error: 'Sessione non valida' }, 401)
 
-  const { data: me } = await admin.from('profiles').select('role, is_active').eq('id', u.user.id).maybeSingle()
-  if (!me?.is_active || !['admin', 'reception'].includes(me.role)) return json({ error: 'Non autorizzato' }, 403)
+  const { data: me } = await admin.from('profiles').select('role, is_active, approval_status').eq('id', u.user.id).maybeSingle()
+  if (!me?.is_active || me.approval_status !== 'approved' || !['admin', 'reception'].includes(me.role)) return json({ error: 'Non autorizzato' }, 403)
 
   let body: Record<string, string>
   try {
@@ -44,6 +44,18 @@ Deno.serve(async (req) => {
   })
   if (error) return json({ error: error.message.includes('already') ? 'Esiste già un account con questa email' : error.message }, 400)
 
-  if (role !== 'client') await admin.from('profiles').update({ role }).eq('id', data.user.id)
+  // Creato dallo staff in reception: l'iscrizione è già verificata di persona, quindi approvata
+  const { error: pErr } = await admin
+    .from('profiles')
+    .update({ role, approval_status: 'approved', approved_at: new Date().toISOString(), approved_by: u.user.id })
+    .eq('id', data.user.id)
+  if (pErr) return json({ error: 'Account creato ma non approvato: approvalo dalla dashboard' }, 500)
+  await admin.from('notifications').insert({
+    user_id: data.user.id,
+    title: 'Benvenuto in OldSchool Gym! 🥊',
+    body: 'Completa il profilo e prenota la tua prima lezione.',
+    kind: 'welcome',
+    link: '/app/profilo',
+  })
   return json({ ok: true, id: data.user.id })
 })

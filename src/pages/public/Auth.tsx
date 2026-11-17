@@ -119,7 +119,7 @@ export function Register() {
     setBusy(false)
     if (error) return toast.error(errMsg(error))
     if (!data.session) setSent(true)
-    else toast.success('Benvenuto in squadra! 🥊')
+    else toast.success('Richiesta inviata! La palestra deve approvare la tua iscrizione.')
   }
 
   if (sent)
@@ -127,7 +127,7 @@ export function Register() {
       <AuthShell title="Controlla la posta" subtitle={`Ti abbiamo inviato un link di conferma a ${f.email}`}>
         <div className="card flex flex-col items-center gap-3 p-6 text-center">
           <Mail className="size-10 text-gold" />
-          <p className="text-sm text-muted">Apri l'email e tocca il link per attivare l'account. Controlla anche lo spam.</p>
+          <p className="text-sm text-muted">Apri l'email e tocca il link per confermare l'indirizzo. Controlla anche lo spam. Poi la palestra approverà la tua iscrizione.</p>
           <Link to="/accedi" className="w-full">
             <Button block variant="outline">
               Vai al login

@@ -1,4 +1,5 @@
 import { PushBanner } from '../../components/PushCard'
+import PendingSignups from '../../components/PendingSignups'
 import { motion } from 'framer-motion'
 import { AlertTriangle, Bell, CalendarClock, FileWarning, ScanLine, UserPlus, Users, Wallet } from 'lucide-react'
 import { lazy, Suspense } from 'react'
@@ -27,7 +28,7 @@ interface Dash {
 }
 
 export default function StaffDashboard() {
-  const { profile, isFront } = useAuth()
+  const { profile, isFront, isAdmin } = useAuth()
   const nav = useNavigate()
   const { unread } = useNotifications(profile?.id)
   const { data: d, loading } = useAsync(async () => {
@@ -55,6 +56,8 @@ export default function StaffDashboard() {
           Vista cliente
         </Link>
       </div>
+
+      {isAdmin && <PendingSignups />}
 
       {loading || !d ? (
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
