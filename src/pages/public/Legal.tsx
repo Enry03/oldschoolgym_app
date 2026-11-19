@@ -23,7 +23,13 @@ export function Privacy() {
         Informativa ai sensi degli artt. 13-14 del Regolamento UE 2016/679 (GDPR). Titolare del trattamento: <b>{settings?.name ?? 'OldSchool Gym'}</b>, {settings?.address}. Contatto: {settings?.email}.
       </p>
       <h2>Quali dati trattiamo</h2>
-      <p>Dati anagrafici e di contatto, dati dell'abbonamento e dei pagamenti, presenze e prenotazioni, schede di allenamento, misurazioni fisiche facoltative, certificato medico sportivo (dato relativo alla salute) e foto dei progressi che decidi di caricare.</p>
+      <p>Dati anagrafici e di contatto (compresa la data di nascita), dati dell'abbonamento e dei pagamenti, presenze e prenotazioni, schede di allenamento, misurazioni fisiche facoltative, certificato medico sportivo (dato relativo alla salute) e foto dei progressi che decidi di caricare. Per i minorenni anche nome e recapiti del genitore.</p>
+      <h2>Foto profilo e ingresso</h2>
+      <p>All'iscrizione la reception scatta una tua foto. Serve solo a riconoscerti all'ingresso: compare allo staff e sul tablet dell'ingresso per qualche secondo quando entri, insieme al nome e all'iniziale del cognome. Non usiamo riconoscimento facciale.</p>
+      <h2>Certificato medico (dati sanitari)</h2>
+      <p>Il certificato medico e la sua scadenza sono dati relativi alla salute (art. 9 GDPR): li trattiamo solo con il tuo consenso esplicito, dato all'iscrizione, per verificare che tu possa allenarti in sicurezza. Li vedono solo la reception e l'amministrazione (e il tuo trainer, per la sola validità). Puoi revocare il consenso, ma senza certificato valido non è possibile accedere alla palestra.</p>
+      <h2>Minorenni</h2>
+      <p>I minorenni possono iscriversi dall'età indicata nel regolamento, solo con il consenso firmato di un genitore o di chi esercita la responsabilità genitoriale, raccolto in reception prima dell'approvazione.</p>
       <h2>Perché</h2>
       <p>Per gestire iscrizione, accessi, prenotazioni e allenamenti (esecuzione del contratto), per adempiere agli obblighi di legge (certificato medico, contabilità) e, solo con il tuo consenso, per inviarti promozioni.</p>
       <h2>Chi vede i tuoi dati</h2>
@@ -32,6 +38,26 @@ export function Privacy() {
       <p>Per la durata del rapporto e fino a 10 anni per i dati contabili. Puoi eliminare il tuo account in qualsiasi momento dal profilo.</p>
       <h2>I tuoi diritti</h2>
       <p>Accesso, rettifica, cancellazione, portabilità (esporti i dati in JSON dal profilo), opposizione e revoca dei consensi in qualsiasi momento. Puoi anche presentare reclamo al Garante Privacy.</p>
+    </LegalShell>
+  )
+}
+
+export function Rules() {
+  const { settings } = useAuth()
+  return (
+    <LegalShell title="Regolamento">
+      {!settings ? (
+        <p>Caricamento…</p>
+      ) : (
+        <>
+          <p className="text-xs text-muted">
+            Versione {settings.rules_version}. Età minima per iscriversi: {settings.min_age} anni (sotto i {settings.adult_age} con consenso firmato di un genitore).
+          </p>
+          {settings.rules_text.split(/\n+/).map((r, i) => (
+            <p key={i}>{r}</p>
+          ))}
+        </>
+      )}
     </LegalShell>
   )
 }

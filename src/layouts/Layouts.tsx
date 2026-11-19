@@ -1,10 +1,12 @@
 import clsx from 'clsx'
 import { AnimatePresence, motion } from 'framer-motion'
-import { CalendarDays, Clock3, RefreshCw, ShieldX, Dumbbell, Home, LayoutDashboard, LogOut, Menu, ScanLine, User, Users } from 'lucide-react'
-import { useEffect, type ReactNode } from 'react'
-import { NavLink, Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { CalendarDays, Clock3, FileCheck2, RefreshCw, ShieldX, Dumbbell, Home, LayoutDashboard, LogOut, Menu, ScanLine, User, Users } from 'lucide-react'
+import { useEffect, useState, type ReactNode } from 'react'
+import { Link, NavLink, Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 import { Avatar, Logo, Spinner } from '../components/ui'
 import { useAuth } from '../context/AuthContext'
+import { errMsg, supabase } from '../lib/supabase'
 import { fullName, roleLabel } from '../lib/format'
 
 export function PageTransition({ children }: { children: ReactNode }) {
@@ -108,12 +110,13 @@ function SideNav({ items, extra }: { items: NavItem[]; extra?: NavItem[] }) {
 }
 
 export function RequireAuth({ staff }: { staff?: boolean }) {
-  const { session, profile, loading, isStaff } = useAuth()
+  const { session, profile, loading, isStaff, settings } = useAuth()
   const loc = useLocation()
   if (loading || (session && !profile)) return <Spinner />
   if (!session) return <Navigate to="/accedi" replace state={{ from: loc.pathname }} />
   if (staff && !isStaff) return <Navigate to="/app" replace />
   if (profile && profile.approval_status !== 'approved') return <PendingApproval />
+  if (profile && profile.role === 'client' && settings && (profile.rules_version !== settings.rules_version || !profile.consent_health)) return <AcceptRules />
   if (profile && !profile.is_active) {
     return (
       <div className="grid min-h-dvh place-items-center p-8 text-center">
@@ -126,6 +129,70 @@ export function RequireAuth({ staff }: { staff?: boolean }) {
     )
   }
   return <Outlet />
+}
+
+// Regolamento nuovo (o mai accettato, per chi è stato iscritto dalla reception): va accettato per continuare.
+// La registrazione dell'accettazione passa da accept_rules, che controlla la versione nel database.
+function AcceptRules() {
+  const { profile, settings, refreshProfile, signOut } = useAuth()
+  const nav = useNavigate()
+  const [rules, setRules] = useState(false)
+  const [health, setHealth] = useState(!!profile?.consent_health)
+  const [busy, setBusy] = useState(false)
+  const updated = profile?.rules_version != null
+  async function accept() {
+    if (!rules || !health) return toast.error('Servono entrambe le conferme per continuare')
+    setBusy(true)
+    const { error } = await supabase.rpc('accept_rules', { p_version: settings!.rules_version, p_health: true })
+    setBusy(false)
+    if (error) return toast.error(errMsg(error))
+    await refreshProfile()
+    toast.success('Grazie, buon allenamento! 💪')
+  }
+  return (
+    <div className="grid min-h-dvh place-items-center p-6">
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md">
+        <div className="mx-auto mb-4 grid size-14 place-items-center rounded-full bg-gold/15 text-gold">
+          <FileCheck2 className="size-7" />
+        </div>
+        <h1 className="text-center font-display text-3xl uppercase">{updated ? 'Regolamento aggiornato' : 'Regolamento della palestra'}</h1>
+        <p className="mt-2 text-center text-sm text-muted">{updated ? 'Abbiamo aggiornato le regole: leggile e accettale per continuare.' : 'Prima di iniziare leggi e accetta le regole della palestra.'}</p>
+        <div className="card mt-5 max-h-[45dvh] space-y-2 overflow-y-auto p-4 text-sm leading-relaxed text-cream/85">
+          {(settings?.rules_text ?? '').split(/\n+/).map((r, i) => (
+            <p key={i}>{r}</p>
+          ))}
+        </div>
+        <div className="mt-4 space-y-2 text-xs text-cream/80">
+          <label className="flex items-start gap-2">
+            <input type="checkbox" className="mt-0.5 size-4 accent-[#F5C518]" checked={rules} onChange={(e) => setRules(e.target.checked)} />
+            <span>Ho letto e accetto il regolamento.</span>
+          </label>
+          <label className="flex items-start gap-2">
+            <input type="checkbox" className="mt-0.5 size-4 accent-[#F5C518]" checked={health} onChange={(e) => setHealth(e.target.checked)} />
+            <span>
+              Acconsento al trattamento dei miei dati relativi alla salute (certificato medico sportivo), come spiegato nell'
+              <Link to="/privacy" target="_blank" className="text-gold underline">
+                informativa privacy
+              </Link>
+              .
+            </span>
+          </label>
+        </div>
+        <button disabled={busy} className="mt-5 w-full rounded-xl bg-gold px-4 py-3 font-semibold text-ink active:scale-95 disabled:opacity-60" onClick={accept}>
+          {busy ? 'Salvataggio…' : 'Accetto e continuo'}
+        </button>
+        <button
+          className="mt-2 w-full rounded-xl px-4 py-3 text-sm font-semibold text-muted hover:text-cream"
+          onClick={async () => {
+            await signOut()
+            nav('/')
+          }}
+        >
+          Esci
+        </button>
+      </motion.div>
+    </div>
+  )
 }
 
 // Schermata per chi si è registrato e aspetta l'ok della palestra (o è stato rifiutato).
@@ -164,7 +231,10 @@ function PendingApproval() {
             <p className="mt-2 text-muted">
               Ciao {profile?.first_name || 'campione'}, abbiamo ricevuto la tua richiesta. La palestra deve approvarla prima che tu possa usare l'app: prenotazioni, schede e ingresso si sbloccano subito dopo.
             </p>
-            <p className="mt-2 text-sm text-muted">Di solito basta passare in reception con un documento.</p>
+            <p className="mt-2 text-sm text-muted">
+              Passa in reception con un documento: ti scattiamo la foto per l'ingresso e approviamo l'iscrizione.
+              {profile?.guardian_name ? ' Porta con te un genitore per firmare il modulo di consenso.' : ''}
+            </p>
           </>
         )}
         <div className="mt-6 flex flex-col gap-2">

@@ -24,6 +24,14 @@ export interface Profile {
   approval_status: 'pending' | 'approved' | 'rejected'
   approved_at: string | null
   rejection_reason: string | null
+  rules_version: number | null
+  rules_accepted_at: string | null
+  consent_health: boolean
+  consent_health_at: string | null
+  guardian_name: string | null
+  guardian_phone: string | null
+  guardian_email: string | null
+  guardian_verified_at: string | null
   created_at: string
 }
 
@@ -41,6 +49,11 @@ export interface GymSettings {
   max_capacity: number
   inactivity_days: number
   block_without_certificate: boolean
+  rules_text: string
+  rules_version: number
+  min_age: number
+  adult_age: number
+  require_photo_for_approval: boolean
 }
 
 export interface Plan {

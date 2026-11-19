@@ -66,7 +66,7 @@ export default function ClientDetail() {
 function InfoTab({ c, onChanged, isAdmin, isFront }: { c: Profile; onChanged: () => void; isAdmin: boolean; isFront: boolean }) {
   const { profile } = useAuth()
   const nav = useNavigate()
-  const [f, setF] = useState({ first_name: c.first_name, last_name: c.last_name, phone: c.phone ?? '', birth_date: c.birth_date ?? '', trainer_id: c.trainer_id ?? '', role: c.role, is_active: c.is_active })
+  const [f, setF] = useState({ first_name: c.first_name, last_name: c.last_name, phone: c.phone ?? '', birth_date: c.birth_date ?? '', guardian_name: c.guardian_name ?? '', guardian_phone: c.guardian_phone ?? '', guardian_email: c.guardian_email ?? '', trainer_id: c.trainer_id ?? '', role: c.role, is_active: c.is_active })
   const [busy, setBusy] = useState(false)
   const { data: trainers } = useAsync(async () => {
     const { data } = await supabase.rpc('get_staff')
@@ -80,7 +80,7 @@ function InfoTab({ c, onChanged, isAdmin, isFront }: { c: Profile; onChanged: ()
 
   async function save() {
     setBusy(true)
-    const patch: Record<string, unknown> = { first_name: f.first_name, last_name: f.last_name, phone: f.phone || null, birth_date: f.birth_date || null }
+    const patch: Record<string, unknown> = { first_name: f.first_name, last_name: f.last_name, phone: f.phone || null, birth_date: f.birth_date || null, guardian_name: f.guardian_name.trim() || null, guardian_phone: f.guardian_phone.trim() || null, guardian_email: f.guardian_email.trim() || null }
     if (isFront) patch.trainer_id = f.trainer_id || null
     if (isAdmin) {
       patch.role = f.role
@@ -121,6 +121,19 @@ function InfoTab({ c, onChanged, isAdmin, isFront }: { c: Profile; onChanged: ()
         <Field label="Email">
           <Input value={c.email ?? ''} disabled />
         </Field>
+        {c.role === 'client' && (isFront || c.guardian_name) && (
+          <div className="grid grid-cols-3 gap-3">
+            <Field label="Genitore (se minorenne)">
+              <Input value={f.guardian_name} disabled={!isFront} maxLength={120} onChange={(e) => setF({ ...f, guardian_name: e.target.value })} />
+            </Field>
+            <Field label="Tel. genitore">
+              <Input value={f.guardian_phone} disabled={!isFront} maxLength={40} onChange={(e) => setF({ ...f, guardian_phone: e.target.value })} />
+            </Field>
+            <Field label="Email genitore">
+              <Input value={f.guardian_email} disabled={!isFront} maxLength={200} onChange={(e) => setF({ ...f, guardian_email: e.target.value })} />
+            </Field>
+          </div>
+        )}
         {c.role === 'client' && (
           <Field label="Personal trainer assegnato">
             <Select value={f.trainer_id} disabled={!isFront} onChange={(e) => setF({ ...f, trainer_id: e.target.value })}>
@@ -157,6 +170,13 @@ function InfoTab({ c, onChanged, isAdmin, isFront }: { c: Profile; onChanged: ()
         <Badge tone={c.consent_privacy ? 'green' : 'red'}>Privacy {c.consent_privacy ? '✓' : '✗'}</Badge>
         <Badge tone={c.consent_marketing ? 'green' : 'gray'}>Marketing {c.consent_marketing ? '✓' : '✗'}</Badge>
         <Badge tone={c.consent_photos ? 'green' : 'gray'}>Foto {c.consent_photos ? '✓' : '✗'}</Badge>
+        {c.role === 'client' && <Badge tone={c.consent_health ? 'green' : 'red'}>Dati sanitari {c.consent_health ? '✓' : '✗'}</Badge>}
+        {c.role === 'client' && (
+          <Badge tone={c.rules_version ? 'green' : 'red'}>
+            Regolamento {c.rules_version ? `v${c.rules_version} ${c.rules_accepted_at ? fmtDate(c.rules_accepted_at, 'd/M/yy') : ''}` : '✗'}
+          </Badge>
+        )}
+        {c.guardian_verified_at && <Badge tone="gold">Modulo genitore ✓ {fmtDate(c.guardian_verified_at, 'd/M/yy')}</Badge>}
         {c.referral_code && <Badge>Codice amico {c.referral_code}</Badge>}
       </div>
 
