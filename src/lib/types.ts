@@ -21,6 +21,9 @@ export interface Profile {
   referral_code: string | null
   referred_by: string | null
   is_active: boolean
+  approval_status: 'pending' | 'approved' | 'rejected'
+  approved_at: string | null
+  rejection_reason: string | null
   created_at: string
 }
 

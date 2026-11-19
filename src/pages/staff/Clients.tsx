@@ -10,7 +10,7 @@ import { useAsync } from '../../lib/hooks'
 import { SUPABASE_URL, supabase } from '../../lib/supabase'
 import type { Certificate, Membership, Profile } from '../../lib/types'
 
-type Filter = 'tutti' | 'attivi' | 'scaduti' | 'scadenza' | 'certificato' | 'staff'
+type Filter = 'tutti' | 'attivi' | 'scaduti' | 'scadenza' | 'certificato' | 'staff' | 'attesa'
 
 export interface ClientRow extends Profile {
   membership?: Membership
@@ -50,6 +50,10 @@ export default function Clients() {
       if (filter === 'staff') {
         if (c.role === 'client') return false
       } else if (c.role !== 'client') return false
+      // le iscrizioni non approvate stanno solo nel filtro "In attesa"
+      if (filter === 'attesa') {
+        if (c.approval_status === 'approved') return false
+      } else if (c.approval_status !== 'approved') return false
       if (profile?.role === 'trainer' && filter !== 'staff' && c.trainer_id !== profile.id) return false
       if (filter === 'attivi' && !isActive(c.membership)) return false
       if (filter === 'scaduti' && isActive(c.membership)) return false
@@ -116,6 +120,7 @@ export default function Clients() {
           { value: 'scaduti', label: 'Scaduti' },
           { value: 'certificato', label: 'Certificato' },
           { value: 'staff', label: 'Staff' },
+          ...(isFront ? [{ value: 'attesa' as Filter, label: 'In attesa' }] : []),
         ]}
       />
       <div className="mt-4 space-y-2">
@@ -136,7 +141,9 @@ export default function Clients() {
                     <div className="truncate text-xs text-muted">{c.role !== 'client' ? roleLabel[c.role] : c.membership ? `${c.membership.plan_name}${c.membership.end_date ? ` · fino al ${fmtDate(c.membership.end_date, 'd/M')}` : ''}` : 'Nessun abbonamento'}</div>
                   </div>
                   <div className="flex flex-col items-end gap-1">
-                    {c.role === 'client' &&
+                    {c.approval_status === 'pending' && <Badge tone="gold">In attesa</Badge>}
+                    {c.approval_status === 'rejected' && <Badge tone="red">Rifiutato</Badge>}
+                    {c.role === 'client' && c.approval_status === 'approved' &&
                       (isActive(c.membership) ? left !== null && left <= 7 ? <Badge tone="gold">{left} gg</Badge> : <Badge tone="green">Attivo</Badge> : <Badge tone="red">Scaduto</Badge>)}
                     {c.role === 'client' && (certLeft === null || certLeft < 0) && (
                       <span className="flex items-center gap-1 text-[10px] text-danger">
