@@ -43,7 +43,7 @@ export default function QrPass() {
         </div>
       </motion.div>
       <p className="mt-6 flex items-center gap-2 text-sm text-muted">
-        <Sun className="size-4" /> Alza la luminosità e mostra il codice in reception
+        <Sun className="size-4" /> Alza la luminosità e mostra il codice allo staff
       </p>
     </div>
   )

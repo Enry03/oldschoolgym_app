@@ -132,7 +132,7 @@ export default function Landing() {
         <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {[
             { i: CalendarCheck, t: 'Prenota in 2 tap', d: "Corsi ed eventi con posti in tempo reale e lista d'attesa automatica." },
-            { i: QrCode, t: 'Entra con il QR', d: 'Il tuo pass personale: mostri il telefono in reception e sei dentro.' },
+            { i: QrCode, t: 'Entra con il QR', d: 'Inquadri il QR del tablet all\'ingresso con l\'app e sei dentro, in un secondo.' },
             { i: Dumbbell, t: 'Scheda sempre con te', d: 'Esercizi, serie e carichi dal tuo trainer. Segni i pesi mentre ti alleni.' },
             { i: TrendingUp, t: 'Progressi reali', d: 'Peso, misure e grafici per vedere quanto sei migliorato.' },
             { i: Sparkles, t: 'Notifiche utili', d: 'Promemoria lezioni, scadenze e news della palestra, mai spam.' },

@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { BarChart3, ChevronRight, ClipboardList, Download, History, Megaphone, MessageCircle, Package, Phone, Plus, ScanLine, Settings, ShoppingBag, Tag, Trash2, UserPlus, Users } from 'lucide-react'
+import { BarChart3, ChevronRight, ClipboardList, Download, History, Megaphone, MessageCircle, Package, Phone, Plus, ScanLine, Settings, ShoppingBag, Tablet, Tag, Trash2, UserPlus, Users } from 'lucide-react'
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -17,6 +17,7 @@ export function More() {
   const { isFront, isAdmin } = useAuth()
   const items = [
     { to: '/staff/checkin', icon: ScanLine, label: 'Check-in QR', show: true },
+    { to: '/staff/tablet', icon: Tablet, label: 'Tablet ingresso (QR)', show: isAdmin },
     { to: '/staff/schede', icon: ClipboardList, label: 'Schede ed esercizi', show: true },
     { to: '/staff/messaggi', icon: MessageCircle, label: 'Messaggi', show: true },
     { to: '/staff/comunicazioni', icon: Megaphone, label: 'Comunicazioni e news', show: isFront },

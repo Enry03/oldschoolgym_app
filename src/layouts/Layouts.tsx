@@ -1,6 +1,6 @@
 import clsx from 'clsx'
 import { AnimatePresence, motion } from 'framer-motion'
-import { CalendarDays, Clock3, RefreshCw, ShieldX, Dumbbell, Home, LayoutDashboard, LogOut, Menu, QrCode, ScanLine, User, Users } from 'lucide-react'
+import { CalendarDays, Clock3, RefreshCw, ShieldX, Dumbbell, Home, LayoutDashboard, LogOut, Menu, ScanLine, User, Users } from 'lucide-react'
 import { useEffect, type ReactNode } from 'react'
 import { NavLink, Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { Avatar, Logo, Spinner } from '../components/ui'
@@ -210,7 +210,7 @@ export function ClientLayout() {
           <Outlet />
         </PageTransition>
       </main>
-      <BottomNav items={clientItems} center={{ to: '/app/qr', icon: QrCode, label: 'Il mio QR' }} />
+      <BottomNav items={clientItems} center={{ to: '/app/entra', icon: ScanLine, label: 'Entra in palestra' }} />
     </div>
   )
 }
