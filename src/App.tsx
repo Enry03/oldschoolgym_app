@@ -6,7 +6,7 @@ import { AuthProvider } from './context/AuthContext'
 import { ClientLayout, RequireAuth, StaffLayout } from './layouts/Layouts'
 import { ForgotPassword, Login, Register, UpdatePassword } from './pages/public/Auth'
 import Landing from './pages/public/Landing'
-import { CookieBanner, CookiePolicy, Privacy } from './pages/public/Legal'
+import { CookieBanner, CookiePolicy, Privacy, Rules } from './pages/public/Legal'
 
 const ClientHome = lazy(() => import('./pages/client/Home'))
 const ClientCalendar = lazy(() => import('./pages/client/Calendar'))
@@ -54,6 +54,7 @@ export default function App() {
             <Route path="/nuova-password" element={<UpdatePassword />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/cookie" element={<CookiePolicy />} />
+            <Route path="/regolamento" element={<Rules />} />
             <Route path="/kiosk" element={<Kiosk />} />
 
             <Route element={<RequireAuth />}>

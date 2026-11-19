@@ -742,6 +742,21 @@ export function SettingsPage() {
         </div>
         <Toggle label="Blocca ingresso senza certificato valido" desc="Il check-in viene rifiutato se il certificato manca o è scaduto" checked={f.block_without_certificate} onChange={(v) => set('block_without_certificate', v)} />
       </Card>
+      <Card className="mt-4 space-y-3">
+        <div className="label text-gold">Iscrizioni</div>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Età minima" hint="Sotto non si approva">
+            <Input inputMode="numeric" value={f.min_age} onChange={(e) => set('min_age', Math.max(0, Math.min(99, Number(e.target.value) || 0)))} />
+          </Field>
+          <Field label="Maggiore età" hint="Sotto serve il genitore">
+            <Input inputMode="numeric" value={f.adult_age} onChange={(e) => set('adult_age', Math.max(14, Math.min(25, Number(e.target.value) || 18)))} />
+          </Field>
+        </div>
+        <Toggle label="Foto obbligatoria per approvare" desc="La reception scatta la foto prima dell'approvazione: serve per riconoscere chi entra" checked={f.require_photo_for_approval} onChange={(v) => set('require_photo_for_approval', v)} />
+        <Field label={`Regolamento (versione ${f.rules_version})`} hint="Una regola per riga. Se lo modifichi, i clienti dovranno riaccettarlo al prossimo accesso.">
+          <Textarea rows={12} maxLength={20000} value={f.rules_text} onChange={(e) => set('rules_text', e.target.value)} />
+        </Field>
+      </Card>
       <Button block size="lg" className="mt-5" loading={busy} onClick={save}>
         Salva impostazioni
       </Button>

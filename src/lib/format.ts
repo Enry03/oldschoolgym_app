@@ -72,3 +72,13 @@ export function downloadBlob(filename: string, blob: Blob) {
   a.click()
   setTimeout(() => URL.revokeObjectURL(url), 1000)
 }
+
+/** Anni compiuti a oggi da una data YYYY-MM-DD (null se manca o non è valida) */
+export function ageYears(birth?: string | null): number | null {
+  if (!birth || !/^\d{4}-\d{2}-\d{2}$/.test(birth)) return null
+  const [y, m, d] = birth.split('-').map(Number)
+  const now = new Date()
+  let a = now.getFullYear() - y
+  if (now.getMonth() + 1 < m || (now.getMonth() + 1 === m && now.getDate() < d)) a--
+  return Number.isFinite(a) && a >= 0 && a < 130 ? a : null
+}
