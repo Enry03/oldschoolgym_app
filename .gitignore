@@ -6,3 +6,7 @@ dev-dist
 *.local
 .DS_Store
 .vercel
+
+# graphify: grafo del codice, si rigenera in locale (graphify update .)
+graphify-out/
+.claude/settings.local.json
