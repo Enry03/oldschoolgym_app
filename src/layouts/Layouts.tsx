@@ -115,8 +115,9 @@ export function RequireAuth({ staff }: { staff?: boolean }) {
   if (loading || (session && !profile)) return <Spinner />
   if (!session) return <Navigate to="/accedi" replace state={{ from: loc.pathname }} />
   if (staff && !isStaff) return <Navigate to="/app" replace />
+  // Prima il regolamento (anche in attesa: chi è iscritto dalla reception lo accetta al primo accesso), poi l'approvazione
+  if (profile && profile.role === 'client' && profile.approval_status !== 'rejected' && settings && (profile.rules_version !== settings.rules_version || profile.privacy_version !== settings.privacy_version || !profile.consent_health)) return <AcceptRules />
   if (profile && profile.approval_status !== 'approved') return <PendingApproval />
-  if (profile && profile.role === 'client' && settings && (profile.rules_version !== settings.rules_version || profile.privacy_version !== settings.privacy_version || !profile.consent_health)) return <AcceptRules />
   if (profile && !profile.is_active) {
     return (
       <div className="grid min-h-dvh place-items-center p-8 text-center">

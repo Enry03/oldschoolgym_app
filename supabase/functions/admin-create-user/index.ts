@@ -44,18 +44,13 @@ Deno.serve(async (req) => {
   })
   if (error) return json({ error: error.message.includes('already') ? 'Esiste già un account con questa email' : error.message }, 400)
 
-  // Creato dallo staff in reception: l'iscrizione è già verificata di persona, quindi approvata
+  // Staff (solo l'admin lo crea): approvato subito. Cliente: resta in attesa come chi si iscrive dall'app,
+  // così l'admin lo approva con gli stessi controlli (età, genitore per i minori, foto, regolamento, consenso sanitario).
+  if (role === 'client') return json({ ok: true, id: data.user.id, pending: true })
   const { error: pErr } = await admin
     .from('profiles')
     .update({ role, approval_status: 'approved', approved_at: new Date().toISOString(), approved_by: u.user.id })
     .eq('id', data.user.id)
-  if (pErr) return json({ error: 'Account creato ma non approvato: approvalo dalla dashboard' }, 500)
-  await admin.from('notifications').insert({
-    user_id: data.user.id,
-    title: 'Benvenuto in OldSchool Gym! 🥊',
-    body: 'Completa il profilo e prenota la tua prima lezione.',
-    kind: 'welcome',
-    link: '/app/profilo',
-  })
+  if (pErr) return json({ error: 'Account creato ma ruolo non assegnato: riprova dalla scheda' }, 500)
   return json({ ok: true, id: data.user.id })
 })
