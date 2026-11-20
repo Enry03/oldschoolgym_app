@@ -151,6 +151,7 @@ export function Register() {
           consent_health: true,
           consent_marketing: marketing,
           rules_version: settings?.rules_version ?? 1,
+          privacy_version: settings?.privacy_version ?? 1,
           ...(minor
             ? { guardian_name: f.guardian_name.trim(), guardian_phone: f.guardian_phone.trim(), guardian_email: f.guardian_email.trim() }
             : {}),
