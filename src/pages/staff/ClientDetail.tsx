@@ -62,6 +62,32 @@ export default function ClientDetail() {
   )
 }
 
+/* ---------- STORICO CONSENSI ---------- */
+const consentLabel: Record<string, string> = { privacy: 'Informativa privacy', rules: 'Regolamento', health: 'Dati sanitari', marketing: 'Promozioni', photos: 'Foto', guardian: 'Modulo genitore' }
+function ConsentHistory({ userId }: { userId: string }) {
+  const { data } = useAsync(async () => {
+    const { data } = await supabase.from('consent_log').select('id, kind, granted, version, created_at').eq('user_id', userId).order('created_at', { ascending: false }).limit(50)
+    return (data as { id: number; kind: string; granted: boolean; version: number | null; created_at: string }[]) ?? []
+  }, [userId])
+  if (!data?.length) return null
+  return (
+    <details className="rounded-2xl bg-surface/60 p-3 text-xs">
+      <summary className="cursor-pointer font-semibold text-cream/85">Storico consensi ({data.length})</summary>
+      <ul className="mt-2 space-y-1 text-cream/80">
+        {data.map((l) => (
+          <li key={l.id} className="flex justify-between gap-2">
+            <span>
+              {l.granted ? '✓' : '✗'} {consentLabel[l.kind] ?? l.kind}
+              {l.version ? ` v${l.version}` : ''}
+            </span>
+            <span className="text-muted">{fmtDate(l.created_at, 'd/M/yy HH:mm')}</span>
+          </li>
+        ))}
+      </ul>
+    </details>
+  )
+}
+
 /* ---------- INFO ---------- */
 function InfoTab({ c, onChanged, isAdmin, isFront }: { c: Profile; onChanged: () => void; isAdmin: boolean; isFront: boolean }) {
   const { profile } = useAuth()
@@ -167,7 +193,7 @@ function InfoTab({ c, onChanged, isAdmin, isFront }: { c: Profile; onChanged: ()
       </Card>
 
       <div className="flex flex-wrap gap-2 text-xs">
-        <Badge tone={c.consent_privacy ? 'green' : 'red'}>Privacy {c.consent_privacy ? '✓' : '✗'}</Badge>
+        <Badge tone={c.consent_privacy ? 'green' : 'red'}>Privacy {c.consent_privacy ? `✓${c.privacy_version ? ` v${c.privacy_version}` : ''}` : '✗'}</Badge>
         <Badge tone={c.consent_marketing ? 'green' : 'gray'}>Marketing {c.consent_marketing ? '✓' : '✗'}</Badge>
         <Badge tone={c.consent_photos ? 'green' : 'gray'}>Foto {c.consent_photos ? '✓' : '✗'}</Badge>
         {c.role === 'client' && <Badge tone={c.consent_health ? 'green' : 'red'}>Dati sanitari {c.consent_health ? '✓' : '✗'}</Badge>}
@@ -179,6 +205,8 @@ function InfoTab({ c, onChanged, isAdmin, isFront }: { c: Profile; onChanged: ()
         {c.guardian_verified_at && <Badge tone="gold">Modulo genitore ✓ {fmtDate(c.guardian_verified_at, 'd/M/yy')}</Badge>}
         {c.referral_code && <Badge>Codice amico {c.referral_code}</Badge>}
       </div>
+
+      {isFront && c.role === 'client' && <ConsentHistory userId={c.id} />}
 
       {isFront && c.role === 'client' && <CertificatesBlock c={c} />}
 

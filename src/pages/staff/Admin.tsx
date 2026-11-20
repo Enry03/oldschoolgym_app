@@ -753,6 +753,9 @@ export function SettingsPage() {
           </Field>
         </div>
         <Toggle label="Foto obbligatoria per approvare" desc="La reception scatta la foto prima dell'approvazione: serve per riconoscere chi entra" checked={f.require_photo_for_approval} onChange={(v) => set('require_photo_for_approval', v)} />
+        <Field label="Versione informativa privacy" hint="Alzala di 1 quando cambia il testo dell'informativa: i clienti dovranno riaccettarla al prossimo accesso.">
+          <Input inputMode="numeric" value={f.privacy_version} onChange={(e) => set('privacy_version', Math.max(1, Math.min(999999, Number(e.target.value) || 1)))} />
+        </Field>
         <Field label={`Regolamento (versione ${f.rules_version})`} hint="Una regola per riga. Se lo modifichi, i clienti dovranno riaccettarlo al prossimo accesso.">
           <Textarea rows={12} maxLength={20000} value={f.rules_text} onChange={(e) => set('rules_text', e.target.value)} />
         </Field>

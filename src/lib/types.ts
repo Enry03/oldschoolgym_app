@@ -25,6 +25,7 @@ export interface Profile {
   approved_at: string | null
   rejection_reason: string | null
   rules_version: number | null
+  privacy_version: number | null
   rules_accepted_at: string | null
   consent_health: boolean
   consent_health_at: string | null
@@ -51,6 +52,7 @@ export interface GymSettings {
   block_without_certificate: boolean
   rules_text: string
   rules_version: number
+  privacy_version: number
   min_age: number
   adult_age: number
   require_photo_for_approval: boolean

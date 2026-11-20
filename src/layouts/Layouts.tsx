@@ -116,7 +116,7 @@ export function RequireAuth({ staff }: { staff?: boolean }) {
   if (!session) return <Navigate to="/accedi" replace state={{ from: loc.pathname }} />
   if (staff && !isStaff) return <Navigate to="/app" replace />
   if (profile && profile.approval_status !== 'approved') return <PendingApproval />
-  if (profile && profile.role === 'client' && settings && (profile.rules_version !== settings.rules_version || !profile.consent_health)) return <AcceptRules />
+  if (profile && profile.role === 'client' && settings && (profile.rules_version !== settings.rules_version || profile.privacy_version !== settings.privacy_version || !profile.consent_health)) return <AcceptRules />
   if (profile && !profile.is_active) {
     return (
       <div className="grid min-h-dvh place-items-center p-8 text-center">
@@ -138,12 +138,14 @@ function AcceptRules() {
   const nav = useNavigate()
   const [rules, setRules] = useState(false)
   const [health, setHealth] = useState(!!profile?.consent_health)
+  const [privacy, setPrivacy] = useState(false)
   const [busy, setBusy] = useState(false)
   const updated = profile?.rules_version != null
+  const needPrivacy = profile?.privacy_version !== settings?.privacy_version
   async function accept() {
-    if (!rules || !health) return toast.error('Servono entrambe le conferme per continuare')
+    if (!rules || !health || (needPrivacy && !privacy)) return toast.error('Servono tutte le conferme per continuare')
     setBusy(true)
-    const { error } = await supabase.rpc('accept_rules', { p_version: settings!.rules_version, p_health: true })
+    const { error } = await supabase.rpc('accept_rules', { p_version: settings!.rules_version, p_health: true, p_privacy: settings!.privacy_version })
     setBusy(false)
     if (error) return toast.error(errMsg(error))
     await refreshProfile()
@@ -167,6 +169,18 @@ function AcceptRules() {
             <input type="checkbox" className="mt-0.5 size-4 accent-[#F5C518]" checked={rules} onChange={(e) => setRules(e.target.checked)} />
             <span>Ho letto e accetto il regolamento.</span>
           </label>
+          {needPrivacy && (
+            <label className="flex items-start gap-2">
+              <input type="checkbox" className="mt-0.5 size-4 accent-[#F5C518]" checked={privacy} onChange={(e) => setPrivacy(e.target.checked)} />
+              <span>
+                Ho letto l'
+                <Link to="/privacy" target="_blank" className="text-gold underline">
+                  informativa privacy
+                </Link>{' '}
+                (versione {settings?.privacy_version}) e acconsento al trattamento dei miei dati per la gestione dell'iscrizione.
+              </span>
+            </label>
+          )}
           <label className="flex items-start gap-2">
             <input type="checkbox" className="mt-0.5 size-4 accent-[#F5C518]" checked={health} onChange={(e) => setHealth(e.target.checked)} />
             <span>

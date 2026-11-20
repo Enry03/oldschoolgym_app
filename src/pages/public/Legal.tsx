@@ -19,6 +19,7 @@ export function Privacy() {
   const { settings } = useAuth()
   return (
     <LegalShell title="Privacy">
+      <p className="text-xs text-muted">Versione {settings?.privacy_version ?? 1}</p>
       <p>
         Informativa ai sensi degli artt. 13-14 del Regolamento UE 2016/679 (GDPR). Titolare del trattamento: <b>{settings?.name ?? 'OldSchool Gym'}</b>, {settings?.address}. Contatto: {settings?.email}.
       </p>
