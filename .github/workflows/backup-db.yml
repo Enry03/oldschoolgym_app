@@ -1,0 +1,52 @@
+# Backup settimanale del database Supabase (il piano gratuito non ha backup scaricabili).
+# Il file è CIFRATO (AES-256) perché il repository è pubblico: senza la passphrase è illeggibile.
+# Segreti da creare in GitHub → Settings → Secrets and variables → Actions:
+#   SUPABASE_DB_URL     stringa "Session pooler" da Supabase → Connect (con la password del database)
+#   BACKUP_PASSPHRASE   frase lunga e casuale, da conservare anche fuori da GitHub
+# Ripristino: gpg -d backup.dump.gpg > backup.dump && pg_restore -d "<url>" --no-owner backup.dump
+name: Backup database
+on:
+  schedule:
+    - cron: '17 3 * * 1' # ogni lunedì alle 03:17 UTC
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  backup:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Controlla i segreti
+        env:
+          DB: ${{ secrets.SUPABASE_DB_URL }}
+          PASS: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          if [ -z "$DB" ] || [ ${#PASS} -lt 20 ]; then
+            echo "::error::Mancano SUPABASE_DB_URL o BACKUP_PASSPHRASE (almeno 20 caratteri)"; exit 1
+          fi
+      - name: Installa pg_dump 17
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -fsSo /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt noble-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list >/dev/null
+          sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client-17
+      - name: Dump cifrato
+        env:
+          DB: ${{ secrets.SUPABASE_DB_URL }}
+          PASS: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          umask 077
+          f="oldschoolgym-$(date -u +%F).dump"
+          /usr/lib/postgresql/17/bin/pg_dump "$DB" -Fc --no-owner --no-privileges \
+            -n public -n private -n auth -n storage -f "$f"
+          gpg --batch --yes --pinentry-mode loopback --passphrase-fd 3 --symmetric --cipher-algo AES256 \
+            -o "$f.gpg" "$f" 3<<<"$PASS"
+          shred -u "$f"
+          ls -l "$f.gpg"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: backup-db
+          path: '*.dump.gpg'
+          retention-days: 60
+          if-no-files-found: error
