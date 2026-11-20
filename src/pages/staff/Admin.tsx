@@ -613,10 +613,10 @@ export function ExportPage() {
     setBusy('p')
     const { data } = await supabase.from('payments').select('*, profiles!payments_user_id_fkey(first_name, last_name, email)').eq('status', 'paid').gte('paid_at', from).lte('paid_at', `${to}T23:59:59`).order('paid_at')
     setBusy('')
-    const rows = ((data as unknown as { receipt_number: number; paid_at: string; description: string; amount_cents: number; method: string; profiles: { first_name: string; last_name: string; email: string } }[]) ?? []).map((p) => ({
+    const rows = ((data as unknown as { receipt_number: number; paid_at: string; description: string; amount_cents: number; method: string; customer_name: string | null; profiles: { first_name: string; last_name: string; email: string } | null }[]) ?? []).map((p) => ({
       Ricevuta: p.receipt_number,
       Data: p.paid_at.slice(0, 10),
-      Cliente: `${p.profiles?.first_name} ${p.profiles?.last_name}`,
+      Cliente: p.profiles ? `${p.profiles.first_name} ${p.profiles.last_name}` : `${p.customer_name ?? 'Cliente'} (account eliminato)`,
       Email: p.profiles?.email,
       Descrizione: p.description,
       Importo: (p.amount_cents / 100).toFixed(2).replace('.', ','),
