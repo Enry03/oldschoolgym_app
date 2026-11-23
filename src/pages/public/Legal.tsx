@@ -1,5 +1,4 @@
 import { AnimatePresence, m } from 'motion/react'
-import { Cookie } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Button, PageHeader } from '../../components/ui'
@@ -93,18 +92,21 @@ export function CookieBanner() {
   return (
     <AnimatePresence>
       {show && pathname !== '/kiosk' && (
-        <m.div initial={{ y: 120, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 120, opacity: 0 }} className="fixed inset-x-3 bottom-24 z-[60] mx-auto max-w-md rounded-2xl border border-line bg-night/95 p-4 shadow-2xl backdrop-blur md:bottom-6">
-          <div className="flex gap-3">
-            <Cookie className="size-6 shrink-0 text-gold" />
-            <p className="text-xs text-cream/80">
-              Usiamo solo strumenti tecnici per farti restare collegato. Niente tracciamento pubblicitario.{' '}
-              <Link to="/cookie" className="text-gold underline">
-                Dettagli
-              </Link>
-            </p>
-          </div>
-          <Button size="sm" block className="mt-3" onClick={accept}>
-            Ho capito
+        <m.div
+          initial={{ y: 40, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: 40, opacity: 0 }}
+          transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+          className={`fixed inset-x-2 z-[60] mx-auto flex max-w-md items-center gap-3 rounded-xl border border-line bg-night px-3 py-2 md:bottom-4 ${/^\/(app|staff)/.test(pathname) ? 'bottom-20' : 'bottom-2'}`}
+        >
+          <p className="flex-1 text-xs leading-snug text-cream/80">
+            Solo cookie tecnici, niente pubblicità.{' '}
+            <Link to="/cookie" className="text-gold underline">
+              Dettagli
+            </Link>
+          </p>
+          <Button size="sm" onClick={accept}>
+            Ok
           </Button>
         </m.div>
       )}
