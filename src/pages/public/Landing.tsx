@@ -5,10 +5,9 @@ import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
 import { Badge, Button, Field, Input, Logo, PhotoPlaceholder, Textarea } from '../../components/ui'
 import { useAuth } from '../../context/AuthContext'
-import { euro } from '../../lib/format'
 import { useAsync } from '../../lib/hooks'
 import { errMsg, supabase } from '../../lib/supabase'
-import type { Course, Plan } from '../../lib/types'
+import type { Course } from '../../lib/types'
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -30,10 +29,6 @@ export default function Landing() {
   const logoY = useTransform(scrollYProgress, [0, 1], [0, 120])
   const logoScale = useTransform(scrollYProgress, [0, 1], [1, 0.8])
 
-  const { data: plans } = useAsync(async () => {
-    const { data } = await supabase.from('plans').select('*').eq('is_active', true).order('sort')
-    return (data as Plan[]) ?? []
-  })
   const { data: courses } = useAsync(async () => {
     const { data } = await supabase.from('courses').select('*').eq('is_active', true).order('name')
     return (data as Course[]) ?? []
@@ -196,40 +191,6 @@ export default function Landing() {
               </div>
             </Reveal>
           ))}
-        </div>
-      </section>
-
-      {/* LISTINO */}
-      <section className="relative overflow-hidden bg-navy py-20">
-        <div className="stripes absolute inset-0 opacity-30" />
-        <div className="relative mx-auto max-w-6xl px-5">
-          <Reveal>
-            <div className="label text-gold">Listino</div>
-            <h2 className="mt-2 font-display text-5xl uppercase leading-none">Abbonamenti</h2>
-          </Reveal>
-          <div className="mt-10 grid gap-4 md:grid-cols-3">
-            {(plans ?? []).map((p, i) => (
-              <Reveal key={p.id} delay={i * 0.06}>
-                <div className={`relative h-full rounded-3xl p-6 ${p.highlight ? 'bg-gold text-ink shadow-[0_20px_60px_-20px_rgba(245,197,24,0.8)]' : 'card'}`}>
-                  {p.highlight && <span className="absolute -top-3 right-5 rounded-full bg-ink px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-gold">Più scelto</span>}
-                  <div className="font-varsity text-lg uppercase">{p.name}</div>
-                  <div className="mt-3 flex items-end gap-1">
-                    <span className="font-display text-6xl leading-none">{euro(p.price_cents)}</span>
-                  </div>
-                  <p className={`mt-2 text-sm ${p.highlight ? 'text-ink/70' : 'text-muted'}`}>{p.description}</p>
-                  <ul className="mt-5 space-y-2 text-sm">
-                    {p.features.map((f) => (
-                      <li key={f} className="flex items-start gap-2">
-                        <Star className="mt-0.5 size-3.5 shrink-0 fill-current" />
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-          <p className="mt-6 text-center text-xs text-cream/60">Prezzi indicativi. Iscrizione e pagamenti presso la reception.</p>
         </div>
       </section>
 
