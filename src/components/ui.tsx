@@ -3,6 +3,7 @@ import clsx from 'clsx'
 import { Camera, ChevronLeft, Loader2, X } from 'lucide-react'
 import { forwardRef, useEffect, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { createPortal } from 'react-dom'
 import logo from '../assets/logo.webp'
 import { initials } from '../lib/format'
 import { publicUrl } from '../lib/supabase'
@@ -268,7 +269,8 @@ export function Sheet({ open, onClose, title, children, footer }: { open: boolea
       window.removeEventListener('keydown', onKey)
     }
   }, [open, onClose])
-  return (
+  // portal su body: dentro la pagina animata il foglio finiva sotto la barra in basso
+  return createPortal(
     <AnimatePresence>
       {open && (
         <m.div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
@@ -300,7 +302,8 @@ export function Sheet({ open, onClose, title, children, footer }: { open: boolea
           </m.div>
         </m.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body,
   )
 }
 

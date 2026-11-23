@@ -97,7 +97,7 @@ export function CookieBanner() {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 40, opacity: 0 }}
           transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-          className={`fixed inset-x-2 z-[60] mx-auto flex max-w-md items-center gap-3 rounded-xl border border-line bg-night px-3 py-2 md:bottom-4 ${/^\/(app|staff)/.test(pathname) ? 'bottom-20' : 'bottom-2'}`}
+          className={`fixed inset-x-2 z-[45] mx-auto flex max-w-md items-center gap-3 rounded-xl border border-line bg-night px-3 py-2 md:bottom-4 ${/^\/(app|staff)/.test(pathname) ? 'bottom-20' : 'bottom-2'}`}
         >
           <p className="flex-1 text-xs leading-snug text-cream/80">
             Solo cookie tecnici, niente pubblicità.{' '}
