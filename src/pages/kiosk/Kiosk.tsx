@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, m } from 'motion/react'
 import { CheckCircle2, Maximize, ShieldAlert, Smartphone, WifiOff, XCircle } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -201,7 +201,6 @@ export default function Kiosk() {
 
   return (
     <div className="relative flex min-h-dvh select-none flex-col items-center justify-between overflow-hidden bg-ink p-6 text-cream" onDoubleClick={fullscreen}>
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-96 bg-[radial-gradient(ellipse_at_top,rgba(245,197,24,0.18),transparent_70%)]" />
       <header className="relative flex w-full items-center justify-between">
         <div className="flex items-center gap-3">
           <Logo size={64} />
@@ -216,11 +215,11 @@ export default function Kiosk() {
       </header>
 
       <main className="relative flex flex-col items-center">
-        <div className="relative rounded-[2rem] bg-white p-6 shadow-[0_30px_100px_-30px_rgba(245,197,24,0.7)]">
+        <div className="relative rounded-[2rem] bg-white p-6">
           {data ? (
-            <motion.div key={data.code} initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.25 }}>
+            <m.div key={data.code} initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.25 }}>
               <QRCodeSVG value={`OSGK:${data.code}`} size={Math.min(window.innerWidth, window.innerHeight) * 0.5} level="M" fgColor="#0B2A55" bgColor="#ffffff" />
-            </motion.div>
+            </m.div>
           ) : (
             <div className="grid aspect-square w-[50vmin] place-items-center text-ink/40">Caricamento…</div>
           )}
@@ -252,7 +251,7 @@ export default function Kiosk() {
 
       <AnimatePresence>
         {shown && (
-          <motion.div
+          <m.div
             key={shown.id}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -260,7 +259,7 @@ export default function Kiosk() {
             className={`absolute inset-0 z-20 grid place-items-center p-8 text-center ${shown.outcome === 'denied' ? 'bg-danger text-white' : shown.outcome === 'duplicate' ? 'bg-gold text-ink' : 'bg-success text-ink'}`}
           >
             <div className="flex flex-col items-center">
-              <motion.div initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', stiffness: 220, damping: 16 }} className="relative">
+              <m.div initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', stiffness: 220, damping: 16 }} className="relative">
                 <div className="size-[34vmin] overflow-hidden rounded-full border-8 border-white/80 bg-ink/20 shadow-2xl">
                   {shown.avatar_url ? (
                     <img src={publicUrl('avatars', shown.avatar_url) ?? ''} alt="" className="size-full object-cover" />
@@ -271,17 +270,17 @@ export default function Kiosk() {
                 <span className="absolute -bottom-3 -right-3 rounded-full bg-white p-2 text-ink shadow-xl">
                   {shown.outcome === 'denied' ? <XCircle className="size-14 text-danger" /> : <CheckCircle2 className="size-14 text-emerald-600" />}
                 </span>
-              </motion.div>
-              <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }} className="mt-8 font-display text-[9vmin] uppercase leading-none">
+              </m.div>
+              <m.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }} className="mt-8 font-display text-[9vmin] uppercase leading-none">
                 {shown.outcome === 'denied' ? shown.name : `Ciao ${shown.name}!`}
-              </motion.div>
+              </m.div>
               <div className="mt-4 text-[4vmin] font-bold">
-                {shown.outcome === 'ok' && 'Ingresso registrato. Buon allenamento!'}
+                {shown.outcome === 'ok' && 'Ingresso registrato. Buon allenamento'}
                 {shown.outcome === 'duplicate' && 'Eri già entrato oggi'}
                 {shown.outcome === 'denied' && 'Ingresso non consentito: passa in reception'}
               </div>
             </div>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </div>

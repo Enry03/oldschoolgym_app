@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { m } from 'motion/react'
 import { CalendarCheck, CheckCircle2, ClipboardList, FileHeart, PauseCircle, Plus, Receipt, StickyNote } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -40,9 +40,9 @@ export default function ClientDetail() {
   return (
     <div>
       <PageHeader title="" back="/staff/clienti" />
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="-mt-14 mb-5 flex flex-col items-center text-center">
-        <Avatar p={c} size={92} ring />
-        <h1 className="mt-3 font-display text-3xl uppercase leading-none">{fullName(c)}</h1>
+      <m.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="-mt-14 mb-5 flex flex-col items-center text-center">
+        <Avatar p={c} size={72} />
+        <h1 className="mt-3 text-2xl font-semibold leading-none">{fullName(c)}</h1>
         <div className="mt-1 flex items-center gap-2 text-sm text-muted">
           <Badge tone={c.role === 'client' ? 'gray' : 'gold'}>{roleLabel[c.role]}</Badge>
           {!c.is_active && <Badge tone="red">Disattivato</Badge>}
@@ -51,7 +51,7 @@ export default function ClientDetail() {
         <div className="mt-3">
           <ContactButtons c={c} />
         </div>
-      </motion.div>
+      </m.div>
       <Segmented<Tab> value={tab} onChange={setTab} options={tabs} className="mb-5" />
       {tab === 'info' && <InfoTab c={c} onChanged={reload} isAdmin={isAdmin} isFront={isFront} />}
       {tab === 'abbonamento' && <MembershipTab c={c} />}
@@ -433,7 +433,7 @@ function NewMembershipSheet({ open, onClose, c, onSaved }: { open: boolean; onCl
       return toast.error(errMsg(error))
     }
     await supabase.from('payments').insert({ user_id: c.id, membership_id: m.id, description: plan.name, amount_cents: cents, method, status: paid ? 'paid' : 'pending', paid_at: paid ? new Date().toISOString() : null, due_date: paid ? null : start })
-    await supabase.from('notifications').insert({ user_id: c.id, title: 'Abbonamento attivato 🎉', body: `${plan.name} dal ${fmtDate(start)}. Buon allenamento!`, kind: 'membership', link: '/app/abbonamento' })
+    await supabase.from('notifications').insert({ user_id: c.id, title: 'Abbonamento attivato', body: `${plan.name} dal ${fmtDate(start)}. Buon allenamento!`, kind: 'membership', link: '/app/abbonamento' })
     setBusy(false)
     toast.success('Abbonamento attivato')
     onSaved()

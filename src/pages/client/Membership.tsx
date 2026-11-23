@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { m } from 'motion/react'
 import { CreditCard, Printer, Receipt } from 'lucide-react'
 import { useState } from 'react'
 import { Badge, Card, Empty, Loading, PageHeader, SectionTitle, Sheet, Button, Logo } from '../../components/ui'
@@ -36,31 +36,30 @@ export default function MembershipPage() {
     <div>
       <PageHeader title="Abbonamento" back kicker="Stato e pagamenti" />
       {current ? (
-        <motion.div initial={{ rotateY: -20, opacity: 0 }} animate={{ rotateY: 0, opacity: 1 }} transition={{ type: 'spring', stiffness: 120 }} className="grain relative overflow-hidden rounded-3xl bg-gradient-to-br from-navy-bright via-navy to-ink p-6" style={{ perspective: 800 }}>
-          <div className="stripes absolute inset-0 opacity-30" />
-          <div className="relative flex items-start justify-between">
+        <m.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }} className="relative overflow-hidden rounded-2xl border border-line/50 bg-surface-2 p-5">
+                    <div className="relative flex items-start justify-between">
             <div>
-              <div className="label !text-gold">Membership card</div>
-              <div className="mt-1 font-display text-4xl uppercase leading-none">{current.plan_name}</div>
+              <div className="text-xs font-medium text-gold">Tessera</div>
+              <div className="mt-1 text-2xl font-semibold leading-none">{current.plan_name}</div>
             </div>
             <Logo size={56} />
           </div>
           <div className="relative mt-6 grid grid-cols-3 gap-3 text-sm">
             <div>
-              <div className="text-[10px] uppercase text-white/60">Inizio</div>
+              <div className="text-[11px] text-muted">Inizio</div>
               <div className="font-semibold">{fmtDate(current.start_date, 'd MMM yy')}</div>
             </div>
             <div>
-              <div className="text-[10px] uppercase text-white/60">Scadenza</div>
+              <div className="text-[11px] text-muted">Scadenza</div>
               <div className="font-semibold">{current.end_date ? fmtDate(current.end_date, 'd MMM yy') : '—'}</div>
             </div>
             <div>
-              <div className="text-[10px] uppercase text-white/60">Ingressi</div>
+              <div className="text-[11px] text-muted">Ingressi</div>
               <div className="font-semibold">{current.entries_left ?? '∞'}</div>
             </div>
           </div>
           <div className="relative mt-5 flex items-center justify-between">
-            <span className="font-varsity text-sm tracking-widest text-white/80">{fullName(profile)}</span>
+            <span className="text-sm text-cream/80">{fullName(profile)}</span>
             {statusBadge(current)}
           </div>
           {current.status === 'suspended' && current.suspended_from && (
@@ -68,7 +67,7 @@ export default function MembershipPage() {
               Sospeso dal {fmtDate(current.suspended_from)} al {fmtDate(current.suspended_to)}: la scadenza è stata posticipata.
             </p>
           )}
-        </motion.div>
+        </m.div>
       ) : (
         <Empty icon={<CreditCard className="size-7" />} title="Nessun abbonamento" text="Passa in reception per scegliere il piano più adatto a te." />
       )}
@@ -130,16 +129,18 @@ export default function MembershipPage() {
       )}
 
       <SectionTitle>Listino</SectionTitle>
-      <div className="no-scrollbar -mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-2">
+      <div className="card divide-y divide-line/50 p-0">
         {data.plans.map((p) => (
-          <div key={p.id} className={`w-56 shrink-0 snap-start rounded-2xl p-4 ${p.highlight ? 'bg-gold text-ink' : 'card'}`}>
-            <div className="font-varsity text-sm uppercase">{p.name}</div>
-            <div className="mt-1 font-display text-4xl">{euro(p.price_cents)}</div>
-            <p className={`mt-1 text-xs ${p.highlight ? 'text-ink/70' : 'text-muted'}`}>{p.description}</p>
+          <div key={p.id} className="flex items-baseline gap-3 p-4">
+            <div className="min-w-0 flex-1">
+              <div className="font-medium">{p.name}</div>
+              {p.description && <p className="mt-0.5 text-xs text-muted">{p.description}</p>}
+            </div>
+            <div className="font-semibold tabular-nums text-gold">{euro(p.price_cents)}</div>
           </div>
         ))}
       </div>
-      <p className="mt-2 text-xs text-muted">I rinnovi si fanno in reception. Riceverai un avviso 7 giorni prima della scadenza.</p>
+      <p className="mt-2 text-xs text-muted">Rinnovi e nuovi carnet si fanno in reception</p>
 
       <Sheet open={!!receipt} onClose={() => setReceipt(null)} title="Ricevuta" footer={<Button block icon={<Printer className="size-4" />} onClick={() => window.print()}>Stampa / salva PDF</Button>}>
         {receipt && (

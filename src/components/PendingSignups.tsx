@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, m } from 'motion/react'
 import { AlertTriangle, Camera, Check, Mail, Phone, UserCheck, X } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { toast } from 'sonner'
@@ -112,7 +112,7 @@ export default function PendingSignups() {
               minor && !p.guardian_name && 'dati genitore',
             ].filter(Boolean) as string[]
             return (
-              <motion.div key={p.id} layout initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: -20 }} className="card space-y-3 p-3">
+              <m.div key={p.id} layout initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: -20 }} className="card space-y-3 p-3">
                 <div className="flex flex-wrap items-center gap-3">
                   <button
                     type="button"
@@ -177,7 +177,7 @@ export default function PendingSignups() {
                     Approva
                   </Button>
                 </div>
-              </motion.div>
+              </m.div>
             )
           })}
         </AnimatePresence>

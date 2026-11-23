@@ -1,5 +1,5 @@
-import { AnimatePresence, motion } from 'framer-motion'
-import { Bell, CheckCheck, Copy, Gift, MessageCircle, Pin, Send, Share2, UserPlus } from 'lucide-react'
+import { AnimatePresence, m as M } from 'motion/react'
+import { Bell, CheckCheck, Copy, MessageCircle, Pin, Send, Share2 } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -33,7 +33,7 @@ export function NotificationsPage() {
       ) : (
         <div className="space-y-2">
           {items.map((n, i) => (
-            <motion.button
+            <M.button
               key={n.id}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0, transition: { delay: Math.min(i, 10) * 0.03 } }}
@@ -49,7 +49,7 @@ export function NotificationsPage() {
                 {n.body && <div className="mt-0.5 text-sm text-muted">{n.body}</div>}
                 <div className="mt-1 text-[11px] text-muted/70">{fmtRelative(n.created_at)}</div>
               </div>
-            </motion.button>
+            </M.button>
           ))}
         </div>
       )}
@@ -74,7 +74,7 @@ export function NewsPage() {
       ) : (
         <div className="space-y-4">
           {data.map((n, i) => (
-            <motion.button key={n.id} onClick={() => setOpen(n)} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0, transition: { delay: i * 0.05 } }} className="card w-full overflow-hidden p-0 text-left">
+            <M.button key={n.id} onClick={() => setOpen(n)} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0, transition: { delay: i * 0.05 } }} className="card w-full overflow-hidden p-0 text-left">
               {n.image_url ? <img src={publicUrl('media', n.image_url) ?? ''} alt="" className="aspect-[16/9] w-full object-cover" /> : <PhotoPlaceholder label={n.category} className="aspect-[16/9]" />}
               <div className="p-4">
                 <div className="flex items-center gap-2">
@@ -86,17 +86,17 @@ export function NewsPage() {
                   )}
                   <span className="ml-auto text-xs text-muted">{fmtDate(n.published_at, 'd MMM')}</span>
                 </div>
-                <h3 className="mt-2 font-display text-2xl uppercase leading-tight">{n.title}</h3>
+                <h3 className="mt-2 text-xl font-semibold leading-tight">{n.title}</h3>
                 <p className="mt-1 line-clamp-2 text-sm text-muted">{n.body}</p>
               </div>
-            </motion.button>
+            </M.button>
           ))}
         </div>
       )}
       <Sheet open={!!open} onClose={() => setOpen(null)} title={open?.category}>
         {open && (
           <article>
-            <h2 className="font-display text-3xl uppercase leading-tight">{open.title}</h2>
+            <h2 className="text-2xl font-semibold leading-tight">{open.title}</h2>
             <div className="mt-1 text-xs text-muted">{fmtDate(open.published_at, 'EEEE d MMMM yyyy')}</div>
             <p className="mt-4 whitespace-pre-line text-[15px] leading-relaxed text-cream/90">{open.body}</p>
           </article>
@@ -137,14 +137,14 @@ export function MessagesPage() {
       ) : (
         <div className="space-y-2">
           {contacts.map((c, i) => (
-            <motion.button key={c.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0, transition: { delay: i * 0.04 } }} onClick={() => setParams({ con: c.id })} className="card flex w-full items-center gap-3 p-3 text-left">
+            <M.button key={c.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0, transition: { delay: i * 0.04 } }} onClick={() => setParams({ con: c.id })} className="card flex w-full items-center gap-3 p-3 text-left">
               <Avatar p={c} size={48} />
               <div className="flex-1">
                 <div className="font-semibold">{fullName(c)}</div>
                 <div className="text-xs text-muted">{roleLabel[c.role]}</div>
               </div>
               <MessageCircle className="size-5 text-gold" />
-            </motion.button>
+            </M.button>
           ))}
         </div>
       )}
@@ -210,17 +210,17 @@ function Chat({ peer, onBack }: { peer: StaffMember; onBack: () => void }) {
         </div>
       </div>
       <div className="no-scrollbar flex-1 space-y-2 overflow-y-auto rounded-3xl bg-night/60 p-3">
-        {msgs.length === 0 && <p className="py-10 text-center text-sm text-muted">Scrivi il primo messaggio 👋</p>}
+        {msgs.length === 0 && <p className="py-10 text-center text-sm text-muted">Scrivi il primo messaggio</p>}
         <AnimatePresence initial={false}>
           {msgs.map((m) => {
             const mine = m.sender_id === me
             return (
-              <motion.div key={m.id} initial={{ opacity: 0, y: 10, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
+              <M.div key={m.id} initial={{ opacity: 0, y: 10, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
                 <div className={`max-w-[78%] rounded-2xl px-3.5 py-2 text-[15px] ${mine ? 'rounded-br-md bg-gold text-ink' : 'rounded-bl-md bg-surface-2'}`}>
                   <div className="whitespace-pre-wrap break-words">{m.body}</div>
                   <div className={`mt-0.5 text-right text-[10px] ${mine ? 'text-ink/60' : 'text-muted'}`}>{fmtTime(m.created_at)}</div>
                 </div>
-              </motion.div>
+              </M.div>
             )
           })}
         </AnimatePresence>
@@ -266,22 +266,21 @@ export function InvitePage() {
     const { error } = await supabase.from('leads').insert({ full_name: f.full_name, phone: f.phone, trial_date: f.trial_date || null, source: 'Pass ospite', status: 'new', referred_by: profile!.id, notes: `Invitato da ${fullName(profile)}` })
     setBusy(false)
     if (error) return toast.error(errMsg(error))
-    toast.success('Pass ospite richiesto! La reception lo confermerà.')
+    toast.success('Pass ospite richiesto, la reception lo confermerà')
     setF({ full_name: '', phone: '', trial_date: '' })
   }
 
   return (
     <div>
       <PageHeader title="Porta un amico" back kicker="Allenarsi in due è meglio" />
-      <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="grain relative overflow-hidden rounded-3xl bg-gold p-6 text-ink">
-        <Gift className="size-10" />
-        <div className="mt-3 font-display text-3xl uppercase leading-none">Il tuo codice</div>
+      <M.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }} className="relative overflow-hidden rounded-2xl bg-gold p-5 text-ink">
+        <div className="text-sm font-medium text-ink/70">Il tuo codice</div>
         <button
           onClick={async () => {
             await navigator.clipboard.writeText(profile?.referral_code ?? '')
             toast.success('Codice copiato')
           }}
-          className="mt-3 flex items-center gap-3 rounded-2xl bg-ink px-5 py-3 font-varsity text-3xl tracking-[0.3em] text-gold"
+          className="mt-2 flex items-center gap-3 rounded-xl bg-ink px-4 py-3 font-mono text-2xl tracking-[0.2em] text-gold"
         >
           {profile?.referral_code} <Copy className="size-5" />
         </button>
@@ -289,12 +288,11 @@ export function InvitePage() {
         <Button variant="navy" className="mt-4 !bg-ink !text-cream" icon={<Share2 className="size-4" />} onClick={share}>
           Condividi invito
         </Button>
-      </motion.div>
+      </M.div>
 
       <div className="card mt-5 p-5">
         <div className="flex items-center gap-2">
-          <UserPlus className="size-5 text-gold" />
-          <h2 className="font-display text-2xl uppercase">Pass ospite</h2>
+          <h2 className="text-lg font-semibold">Pass ospite</h2>
         </div>
         <p className="mt-1 text-sm text-muted">Porta un amico per un allenamento di prova gratuito.</p>
         <form onSubmit={guest} className="mt-4 space-y-3">
@@ -353,13 +351,13 @@ export function PersonalPage() {
       ) : (
         <div className="grid grid-cols-2 gap-3">
           {mineFirst.map((t, i) => (
-            <motion.button key={t.id} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0, transition: { delay: i * 0.06 } }} whileTap={{ scale: 0.97 }} onClick={() => setSel(t)} className="card overflow-hidden p-0 text-left">
+            <M.button key={t.id} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0, transition: { delay: i * 0.06 } }} whileTap={{ scale: 0.97 }} onClick={() => setSel(t)} className="card overflow-hidden p-0 text-left">
               {t.avatar_url ? <img src={publicUrl('avatars', t.avatar_url) ?? ''} alt="" className="aspect-[3/4] w-full object-cover" /> : <PhotoPlaceholder label="Foto trainer" className="aspect-[3/4]" />}
               <div className="p-3">
-                <div className="font-display text-xl uppercase leading-none">{t.first_name}</div>
+                <div className="text-lg font-semibold leading-none">{t.first_name}</div>
                 <div className="mt-1 text-xs text-muted">{t.id === profile?.trainer_id ? 'Il tuo trainer ★' : 'Personal trainer'}</div>
               </div>
-            </motion.button>
+            </M.button>
           ))}
         </div>
       )}

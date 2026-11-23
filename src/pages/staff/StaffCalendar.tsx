@@ -1,6 +1,6 @@
 import { addDays, addWeeks, format, isSameDay, startOfDay, startOfWeek } from 'date-fns'
 import { it } from 'date-fns/locale'
-import { motion } from 'framer-motion'
+import { m } from 'motion/react'
 import { Ban, CalendarOff, Check, ChevronLeft, ChevronRight, Plus, UserX, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
@@ -77,8 +77,8 @@ function Agenda() {
           const active = isSameDay(d, day)
           return (
             <button key={d.toISOString()} onClick={() => setDay(d)} className={`relative flex flex-col items-center rounded-2xl py-2 ${active ? 'text-ink' : 'bg-surface/60'}`}>
-              {active && <motion.span layoutId="sday" className="absolute inset-0 rounded-2xl bg-gold" />}
-              <span className="relative text-[10px] font-bold uppercase opacity-70">{format(d, 'EEEEE', { locale: it })}</span>
+              {active && <m.span layoutId="sday" className="absolute inset-0 rounded-2xl bg-gold" />}
+              <span className="relative text-[10px] font-medium opacity-70">{format(d, 'EEEEE', { locale: it })}</span>
               <span className="relative font-display text-xl">{format(d, 'd')}</span>
               <span className="relative text-[10px] font-semibold opacity-70">{n || ''}</span>
             </button>
@@ -259,7 +259,7 @@ function SessionDetail({ s, onClose, onChanged }: { s: SessionRow | null; onClos
     if (error) return toast.error(errMsg(error))
     const users = (data ?? []).map((a) => a.user_id)
     if (users.length) {
-      await supabase.from('notifications').insert(users.map((u) => ({ user_id: u, title: 'Lezione annullata ❌', body: `${s.title} del ${fmtDate(s.starts_at, 'd/M HH:mm')} è stata annullata. Ci scusiamo!`, kind: 'booking', link: '/app/calendario' })))
+      await supabase.from('notifications').insert(users.map((u) => ({ user_id: u, title: 'Lezione annullata', body: `${s.title} del ${fmtDate(s.starts_at, 'd/M HH:mm')} è stata annullata. Ci scusiamo!`, kind: 'booking', link: '/app/calendario' })))
     }
     toast.success('Lezione annullata e iscritti avvisati')
     onChanged()

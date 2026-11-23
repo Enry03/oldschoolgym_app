@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, m } from 'motion/react'
 import { Check, ChevronDown, ClipboardList, Dumbbell, ImagePlus, Lock, Pause, Play, Plus, Target, Timer, Trash2 } from 'lucide-react'
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
@@ -61,7 +61,7 @@ function PlanTab() {
 
   if (loading) return <Loading rows={4} />
   if (!plans?.length)
-    return <Empty icon={<ClipboardList className="size-7" />} title="Nessuna scheda" text="Il tuo trainer non ti ha ancora assegnato una scheda. Chiedila in sala o scrivigli dall'app!" />
+    return <Empty icon={<ClipboardList className="size-7" />} title="Nessuna scheda" text="Il tuo trainer non ti ha ancora assegnato una scheda. Chiedila in sala o scrivigli dall'app" />
 
   const today = isoDate()
   const items = days.find(([d]) => d === day)?.[1] ?? []
@@ -78,21 +78,20 @@ function PlanTab() {
           ))}
         </Select>
       )}
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="grain relative overflow-hidden rounded-3xl bg-navy-bright p-5">
-        <div className="stripes absolute inset-0 opacity-30" />
-        <div className="relative">
+      <m.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="relative overflow-hidden rounded-2xl border border-line/50 bg-surface-2 p-4">
+                <div className="relative">
           <Badge tone="gold">{plan?.goal ?? 'Scheda personale'}</Badge>
-          <h2 className="mt-2 font-display text-3xl uppercase leading-none">{plan?.title}</h2>
-          {plan?.notes && <p className="mt-2 text-sm text-white/80">{plan.notes}</p>}
-          <div className="mt-3 text-xs text-white/70">
+          <h2 className="mt-2 text-xl font-semibold leading-tight">{plan?.title}</h2>
+          {plan?.notes && <p className="mt-2 text-sm text-cream/80">{plan.notes}</p>}
+          <div className="mt-3 text-xs text-muted">
             Dal {fmtDate(plan?.starts_on)} {plan?.ends_on ? `al ${fmtDate(plan.ends_on)}` : ''}
           </div>
         </div>
-      </motion.div>
+      </m.div>
 
       <div className="no-scrollbar -mx-4 mt-4 flex gap-2 overflow-x-auto px-4">
         {days.map(([d]) => (
-          <button key={d} onClick={() => setDay(d)} className={`shrink-0 rounded-full px-4 py-2 text-sm font-bold transition ${d === day ? 'bg-gold text-ink' : 'bg-surface text-cream/80'}`}>
+          <button key={d} onClick={() => setDay(d)} className={`shrink-0 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${d === day ? 'bg-gold text-ink' : 'bg-surface text-cream/80'}`}>
             {d}
           </button>
         ))}
@@ -104,8 +103,8 @@ function PlanTab() {
           const lastW = last.find((l) => l.weight_kg != null)?.weight_kg
           const done = doneToday.has(it.id)
           return (
-            <motion.button key={it.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0, transition: { delay: i * 0.05 } }} whileTap={{ scale: 0.98 }} onClick={() => setLogItem(it)} className={`card flex w-full items-center gap-4 p-4 text-left ${done ? 'border-success/50' : ''}`}>
-              <div className={`grid size-12 shrink-0 place-items-center rounded-2xl font-display text-xl ${done ? 'bg-success text-ink' : 'bg-gold/15 text-gold'}`}>{done ? <Check className="size-6" /> : i + 1}</div>
+            <m.button key={it.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0, transition: { delay: Math.min(i, 6) * 0.03, duration: 0.2 } }} whileTap={{ scale: 0.98 }} onClick={() => setLogItem(it)} className={`card flex w-full items-center gap-4 p-4 text-left ${done ? 'border-success/50' : ''}`}>
+              <div className={`grid size-9 shrink-0 place-items-center rounded-lg text-sm font-semibold tabular-nums ${done ? 'bg-success text-ink' : 'bg-white/5 text-muted'}`}>{done ? <Check className="size-4" /> : i + 1}</div>
               <div className="min-w-0 flex-1">
                 <div className="font-semibold">{it.exercise_name}</div>
                 <div className="mt-0.5 text-sm text-muted">
@@ -116,10 +115,10 @@ function PlanTab() {
               {lastW != null && (
                 <div className="text-right">
                   <div className="font-display text-xl leading-none">{lastW}</div>
-                  <div className="text-[10px] uppercase text-muted">kg ultimo</div>
+                  <div className="text-[11px] text-muted">kg ultimo</div>
                 </div>
               )}
-            </motion.button>
+            </m.button>
           )
         })}
       </div>
@@ -181,7 +180,7 @@ function LogSheet({ item, onClose, logs, onSaved }: { item: WorkoutItem | null; 
     const { error } = await supabase.from('workout_logs').insert(rows)
     setBusy(false)
     if (error) return toast.error(errMsg(error))
-    toast.success('Serie salvate 🔥')
+    toast.success('Serie salvate')
     onSaved()
     onClose()
   }
@@ -198,11 +197,11 @@ function LogSheet({ item, onClose, logs, onSaved }: { item: WorkoutItem | null; 
           {item.rest_sec ? <RestTimer seconds={item.rest_sec} /> : null}
           <div className="space-y-2">
             {sets.map((s, i) => (
-              <motion.div key={i} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0, transition: { delay: i * 0.04 } }} className="flex items-center gap-3">
+              <m.div key={i} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0, transition: { delay: i * 0.04 } }} className="flex items-center gap-3">
                 <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-night font-display text-lg">{i + 1}</span>
                 <Input inputMode="decimal" placeholder="kg" value={s.weight} onChange={(e) => setSets(sets.map((x, j) => (j === i ? { ...x, weight: e.target.value } : x)))} />
                 <Input inputMode="numeric" placeholder="reps" value={s.reps} onChange={(e) => setSets(sets.map((x, j) => (j === i ? { ...x, reps: e.target.value } : x)))} />
-              </motion.div>
+              </m.div>
             ))}
             <button type="button" onClick={() => setSets([...sets, { weight: '', reps: '' }])} className="flex items-center gap-1 text-sm font-semibold text-gold">
               <Plus className="size-4" /> Aggiungi serie
@@ -307,7 +306,7 @@ export function ProgressTab({ userId, readOnly }: { userId?: string; readOnly?: 
         <div className="mt-3 grid grid-cols-3 gap-2">
           {measureFields.slice(3).map((f) => (
             <div key={f.key} className="rounded-2xl bg-surface/60 p-3 text-center">
-              <div className="text-[10px] uppercase tracking-wider text-muted">{f.label}</div>
+              <div className="text-[11px] text-muted">{f.label}</div>
               <div className="font-display text-xl">{(last[f.key] as number | null) ?? '—'}</div>
               {delta(f.key) != null && <div className={`text-[10px] ${delta(f.key)! <= 0 ? 'text-success' : 'text-gold'}`}>{delta(f.key)! > 0 ? '+' : ''}{delta(f.key)}</div>}
             </div>
@@ -392,7 +391,7 @@ function GoalsBlock() {
   }
   async function toggle(g: Goal) {
     await supabase.from('goals').update({ is_done: !g.is_done }).eq('id', g.id)
-    if (!g.is_done) toast.success('Obiettivo raggiunto! 🏆')
+    if (!g.is_done) toast.success('Obiettivo raggiunto')
     reload()
   }
   async function remove(g: Goal) {
@@ -411,7 +410,7 @@ function GoalsBlock() {
       <div className="space-y-2">
         <AnimatePresence>
           {(goals ?? []).map((g) => (
-            <motion.div key={g.id} layout initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 30 }} className="card flex items-center gap-3 p-3">
+            <m.div key={g.id} layout initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 30 }} className="card flex items-center gap-3 p-3">
               <button onClick={() => toggle(g)} aria-label="Completa" className={`grid size-7 shrink-0 place-items-center rounded-full border-2 transition ${g.is_done ? 'border-success bg-success text-ink' : 'border-line'}`}>
                 {g.is_done && <Check className="size-4" />}
               </button>
@@ -419,7 +418,7 @@ function GoalsBlock() {
               <button onClick={() => remove(g)} aria-label="Elimina" className="text-muted hover:text-danger">
                 <Trash2 className="size-4" />
               </button>
-            </motion.div>
+            </m.div>
           ))}
         </AnimatePresence>
       </div>

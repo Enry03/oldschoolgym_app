@@ -1,4 +1,4 @@
-import { Reorder } from 'framer-motion'
+import { Reorder } from 'motion/react'
 import { Dumbbell, GripVertical, Plus, Search, Trash2, Video } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
@@ -51,7 +51,7 @@ function Templates() {
           (data ?? []).map((t) => (
             <button key={t.id} onClick={() => setEditing(t)} className="card p-4 text-left transition hover:border-gold/40">
               <Badge tone="gold">{t.goal ?? 'Generale'}</Badge>
-              <div className="mt-2 font-display text-2xl uppercase leading-tight">{t.title}</div>
+              <div className="mt-2 text-xl font-semibold leading-tight">{t.title}</div>
               <div className="mt-1 text-xs text-muted">
                 {t.workout_plan_items?.length ?? 0} esercizi · {new Set(t.workout_plan_items?.map((i) => i.day_label)).size} giorni
               </div>
@@ -124,7 +124,7 @@ export function PlanEditor({ plan, userId, template, onDone }: { plan: WorkoutPl
       }
     }
     setBusy(false)
-    toast.success('Scheda salvata 💪')
+    toast.success('Scheda salvata')
     onDone()
   }
   async function remove() {
@@ -196,7 +196,7 @@ export function PlanEditor({ plan, userId, template, onDone }: { plan: WorkoutPl
               <Input aria-label="Recupero secondi" inputMode="numeric" value={it.rest_sec ?? ''} onChange={(e) => update(it.key, { rest_sec: Number(e.target.value) || null })} className="!px-2 text-center" />
               <Input aria-label="Carico" value={it.load_note ?? ''} placeholder="kg" onChange={(e) => update(it.key, { load_note: e.target.value || null })} className="!px-2 text-center" />
             </div>
-            <div className="mt-1 grid grid-cols-4 gap-2 text-center text-[10px] uppercase text-muted">
+            <div className="mt-1 grid grid-cols-4 gap-2 text-center text-[11px] text-muted">
               <span>serie</span>
               <span>reps</span>
               <span>rec. sec</span>

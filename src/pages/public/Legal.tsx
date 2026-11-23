@@ -1,5 +1,4 @@
-import { AnimatePresence, motion } from 'framer-motion'
-import { Cookie } from 'lucide-react'
+import { AnimatePresence, m } from 'motion/react'
 import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Button, PageHeader } from '../../components/ui'
@@ -9,7 +8,7 @@ function LegalShell({ title, children }: { title: string; children: React.ReactN
   return (
     <div className="mx-auto max-w-2xl px-5 py-8">
       <PageHeader title={title} back />
-      <div className="card space-y-4 p-5 text-sm leading-relaxed text-cream/85 [&_h2]:mt-4 [&_h2]:font-display [&_h2]:text-xl [&_h2]:uppercase [&_h2]:text-cream">{children}</div>
+      <div className="card space-y-4 p-5 text-sm leading-relaxed text-cream/85 [&_h2]:mt-4 [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:text-cream">{children}</div>
       <p className="mt-4 text-xs text-muted">Testo base da far verificare al proprio consulente privacy prima della pubblicazione definitiva.</p>
     </div>
   )
@@ -93,20 +92,23 @@ export function CookieBanner() {
   return (
     <AnimatePresence>
       {show && pathname !== '/kiosk' && (
-        <motion.div initial={{ y: 120, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 120, opacity: 0 }} className="fixed inset-x-3 bottom-24 z-[60] mx-auto max-w-md rounded-2xl border border-line bg-night/95 p-4 shadow-2xl backdrop-blur md:bottom-6">
-          <div className="flex gap-3">
-            <Cookie className="size-6 shrink-0 text-gold" />
-            <p className="text-xs text-cream/80">
-              Usiamo solo strumenti tecnici per farti restare collegato. Niente tracciamento pubblicitario.{' '}
-              <Link to="/cookie" className="text-gold underline">
-                Dettagli
-              </Link>
-            </p>
-          </div>
-          <Button size="sm" block className="mt-3" onClick={accept}>
-            Ho capito
+        <m.div
+          initial={{ y: 40, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: 40, opacity: 0 }}
+          transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+          className={`fixed inset-x-2 z-[45] mx-auto flex max-w-md items-center gap-3 rounded-xl border border-line bg-night px-3 py-2 md:bottom-4 ${/^\/(app|staff)/.test(pathname) ? 'bottom-20' : 'bottom-2'}`}
+        >
+          <p className="flex-1 text-xs leading-snug text-cream/80">
+            Solo cookie tecnici, niente pubblicità.{' '}
+            <Link to="/cookie" className="text-gold underline">
+              Dettagli
+            </Link>
+          </p>
+          <Button size="sm" onClick={accept}>
+            Ok
           </Button>
-        </motion.div>
+        </m.div>
       )}
     </AnimatePresence>
   )

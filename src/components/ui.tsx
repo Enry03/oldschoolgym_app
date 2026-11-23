@@ -1,8 +1,9 @@
-import { AnimatePresence, motion, type HTMLMotionProps } from 'framer-motion'
+import { AnimatePresence, m, type HTMLMotionProps } from 'motion/react'
 import clsx from 'clsx'
 import { Camera, ChevronLeft, Loader2, X } from 'lucide-react'
 import { forwardRef, useEffect, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { createPortal } from 'react-dom'
 import logo from '../assets/logo.webp'
 import { initials } from '../lib/format'
 import { publicUrl } from '../lib/supabase'
@@ -10,7 +11,7 @@ import { publicUrl } from '../lib/supabase'
 /* ---------- Button ---------- */
 type Variant = 'gold' | 'navy' | 'ghost' | 'outline' | 'danger' | 'cream'
 const variants: Record<Variant, string> = {
-  gold: 'bg-gold text-ink hover:bg-gold-soft shadow-[0_8px_30px_-8px_rgba(245,197,24,0.6)]',
+  gold: 'bg-gold text-ink hover:bg-gold-soft',
   navy: 'bg-navy-bright text-white hover:brightness-110',
   cream: 'bg-cream text-ink hover:bg-white',
   ghost: 'bg-white/5 text-cream hover:bg-white/10',
@@ -35,7 +36,7 @@ export const Button = forwardRef<HTMLButtonElement, BtnProps>(function Button(
       ref={ref}
       disabled={disabled || loading}
       className={clsx(
-        'relative inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-all duration-200 active:scale-[0.97] disabled:opacity-50 disabled:pointer-events-none select-none',
+        'relative inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-[color,background-color,border-color,transform] duration-150 active:scale-[0.97] disabled:opacity-50 disabled:pointer-events-none select-none',
         size === 'sm' && 'h-9 px-3 text-sm',
         size === 'md' && 'h-11 px-4 text-[15px]',
         size === 'lg' && 'h-14 px-6 text-base',
@@ -73,9 +74,9 @@ export function IconButton({ className, children, badge, ...rest }: ButtonHTMLAt
 /* ---------- Card ---------- */
 export function Card({ className, children, ...rest }: HTMLMotionProps<'div'>) {
   return (
-    <motion.div className={clsx('card p-4', className)} {...rest}>
+    <m.div className={clsx('card p-4', className)} {...rest}>
       {children}
-    </motion.div>
+    </m.div>
   )
 }
 
@@ -118,7 +119,7 @@ export function Toggle({ checked, onChange, label, desc }: { checked: boolean; o
         {desc && <span className="block text-xs text-muted">{desc}</span>}
       </span>
       <span className={clsx('relative h-7 w-12 shrink-0 rounded-full transition-colors', checked ? 'bg-gold' : 'bg-line')}>
-        <motion.span layout transition={{ type: 'spring', stiffness: 600, damping: 32 }} className={clsx('absolute top-1 size-5 rounded-full bg-white shadow', checked ? 'right-1' : 'left-1')} />
+        <m.span layout transition={{ type: 'spring', stiffness: 600, damping: 32 }} className={clsx('absolute top-1 size-5 rounded-full bg-white shadow', checked ? 'right-1' : 'left-1')} />
       </span>
     </button>
   )
@@ -133,7 +134,7 @@ const badgeTones = {
   gray: 'bg-white/8 text-muted',
 }
 export function Badge({ tone = 'gray', children, className }: { tone?: keyof typeof badgeTones; children: ReactNode; className?: string }) {
-  return <span className={clsx('inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold', badgeTones[tone], className)}>{children}</span>
+  return <span className={clsx('inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium', badgeTones[tone], className)}>{children}</span>
 }
 
 /* ---------- Avatar ---------- */
@@ -141,7 +142,7 @@ export function Avatar({ p, size = 44, ring }: { p?: { first_name?: string | nul
   const url = publicUrl('avatars', p?.avatar_url)
   return (
     <span
-      className={clsx('relative inline-grid shrink-0 place-items-center overflow-hidden rounded-full bg-gradient-to-br from-navy-bright to-navy font-varsity text-cream', ring && 'ring-2 ring-gold ring-offset-2 ring-offset-ink')}
+      className={clsx('relative inline-grid shrink-0 place-items-center overflow-hidden rounded-full bg-surface-2 font-semibold text-cream', ring && 'ring-2 ring-gold ring-offset-2 ring-offset-ink')}
       style={{ width: size, height: size, fontSize: size * 0.36 }}
     >
       {url ? <img src={url} alt="" className="size-full object-cover" loading="lazy" /> : initials(p)}
@@ -151,7 +152,7 @@ export function Avatar({ p, size = 44, ring }: { p?: { first_name?: string | nul
 
 /* ---------- Logo ---------- */
 export function Logo({ size = 56, className }: { size?: number; className?: string }) {
-  return <img src={logo} alt="OldSchool Gym" width={size} height={size} className={clsx('select-none drop-shadow-[0_6px_20px_rgba(0,0,0,0.45)]', className)} style={{ width: size, height: 'auto' }} />
+  return <img src={logo} alt="OldSchool Gym" width={size} height={size} className={clsx('select-none', className)} style={{ width: size, height: 'auto' }} />
 }
 
 /* ---------- Segnaposto foto ---------- */
@@ -159,16 +160,13 @@ export function PhotoPlaceholder({ label = 'Foto in arrivo', className, tone = '
   return (
     <div
       className={clsx(
-        'grain relative flex flex-col items-center justify-center gap-2 overflow-hidden text-center',
-        tone === 'navy' && 'bg-gradient-to-br from-navy via-surface-2 to-ink',
-        tone === 'gold' && 'bg-gradient-to-br from-gold-deep via-gold to-gold-soft text-ink',
-        tone === 'dark' && 'bg-gradient-to-br from-surface to-ink',
+        'relative flex flex-col items-center justify-center gap-2 overflow-hidden text-center',
+        tone === 'gold' ? 'bg-gold text-ink' : 'bg-surface-2',
         className,
       )}
     >
-      <div className="stripes absolute inset-0 opacity-40" />
-      <Camera className={clsx('relative size-7', tone === 'gold' ? 'text-ink/60' : 'text-gold/70')} />
-      <span className={clsx('relative font-varsity text-[11px] uppercase tracking-widest', tone === 'gold' ? 'text-ink/70' : 'text-cream/60')}>{label}</span>
+      <Camera className={clsx('size-5', tone === 'gold' ? 'text-ink/60' : 'text-muted')} strokeWidth={1.75} />
+      <span className={clsx('text-xs', tone === 'gold' ? 'text-ink/70' : 'text-muted')}>{label}</span>
     </div>
   )
 }
@@ -184,10 +182,8 @@ export function PageHeader({ title, subtitle, back, right, kicker }: { title: st
         </IconButton>
       )}
       <div className="min-w-0 flex-1">
-        {kicker && <div className="label mb-1 text-gold">{kicker}</div>}
-        <motion.h1 initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="truncate font-display text-[32px] uppercase leading-none tracking-wide">
-          {title}
-        </motion.h1>
+        {kicker && <div className="mb-0.5 text-xs font-medium text-gold">{kicker}</div>}
+        <h1 className="truncate font-varsity text-[26px] leading-tight">{title}</h1>
         {subtitle && <p className="mt-1.5 text-sm text-muted">{subtitle}</p>}
       </div>
       {right}
@@ -198,16 +194,16 @@ export function PageHeader({ title, subtitle, back, right, kicker }: { title: st
 export function SectionTitle({ children, action }: { children: ReactNode; action?: ReactNode }) {
   return (
     <div className="mb-3 mt-7 flex items-center justify-between">
-      <h2 className="font-display text-xl uppercase tracking-wide">{children}</h2>
+      <h2 className="text-base font-semibold text-cream">{children}</h2>
       {action}
     </div>
   )
 }
 
 /* ---------- Stat ---------- */
-export function Stat({ label, value, sub, tone = 'surface', icon, onClick }: { label: string; value: ReactNode; sub?: ReactNode; tone?: 'surface' | 'gold' | 'navy' | 'cream'; icon?: ReactNode; onClick?: () => void }) {
+export function Stat({ label, value, sub, tone = 'surface', onClick }: { label: string; value: ReactNode; sub?: ReactNode; tone?: 'surface' | 'gold' | 'navy' | 'cream'; icon?: ReactNode; onClick?: () => void }) {
   return (
-    <motion.button
+    <m.button
       type="button"
       onClick={onClick}
       whileTap={onClick ? { scale: 0.97 } : undefined}
@@ -221,12 +217,11 @@ export function Stat({ label, value, sub, tone = 'surface', icon, onClick }: { l
       )}
     >
       <div className="flex items-start justify-between gap-2">
-        <span className={clsx('text-[11px] font-semibold uppercase tracking-[0.12em]', tone === 'surface' ? 'text-muted' : 'opacity-70')}>{label}</span>
-        {icon && <span className="opacity-70">{icon}</span>}
+        <span className={clsx('text-xs font-medium', tone === 'surface' ? 'text-muted' : 'opacity-75')}>{label}</span>
       </div>
-      <div className="mt-2 font-display text-4xl leading-none">{value}</div>
+      <div className="mt-2 font-display text-3xl leading-none tabular-nums">{value}</div>
       {sub && <div className={clsx('mt-1.5 text-xs', tone === 'surface' ? 'text-muted' : 'opacity-75')}>{sub}</div>}
-    </motion.button>
+    </m.button>
   )
 }
 
@@ -236,7 +231,7 @@ export function Segmented<T extends string>({ value, onChange, options, classNam
     <div className={clsx('no-scrollbar flex gap-1 overflow-x-auto rounded-2xl bg-night p-1', className)}>
       {options.map((o) => (
         <button key={o.value} onClick={() => onChange(o.value)} className={clsx('relative shrink-0 flex-1 whitespace-nowrap rounded-xl px-3 py-2 text-sm font-semibold transition-colors', value === o.value ? 'text-ink' : 'text-muted hover:text-cream')}>
-          {value === o.value && <motion.span layoutId={`seg-${options.map((x) => x.value).join('')}`} className="absolute inset-0 rounded-xl bg-gold" transition={{ type: 'spring', stiffness: 500, damping: 38 }} />}
+          {value === o.value && <m.span layoutId={`seg-${options.map((x) => x.value).join('')}`} className="absolute inset-0 rounded-xl bg-gold" transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }} />}
           <span className="relative">{o.label}</span>
         </button>
       ))}
@@ -252,7 +247,7 @@ export function Chips<T extends string>({ value, onChange, options }: { value: T
         <button
           key={o.value}
           onClick={() => onChange(o.value)}
-          className={clsx('shrink-0 rounded-full border px-4 py-2 text-sm font-semibold transition', value === o.value ? 'border-gold bg-gold text-ink' : 'border-line text-cream/80 hover:border-gold/50')}
+          className={clsx('shrink-0 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors', value === o.value ? 'border-gold bg-gold text-ink' : 'border-line text-cream/80 hover:border-gold/50')}
         >
           {o.label}
         </button>
@@ -274,12 +269,13 @@ export function Sheet({ open, onClose, title, children, footer }: { open: boolea
       window.removeEventListener('keydown', onKey)
     }
   }, [open, onClose])
-  return (
+  // portal su body: dentro la pagina animata il foglio finiva sotto la barra in basso
+  return createPortal(
     <AnimatePresence>
       {open && (
-        <motion.div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-          <motion.div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
-          <motion.div
+        <m.div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+          <m.div className="absolute inset-0 bg-black/70" onClick={onClose} />
+          <m.div
             role="dialog"
             aria-modal="true"
             initial={{ y: '100%' }}
@@ -294,7 +290,7 @@ export function Sheet({ open, onClose, title, children, footer }: { open: boolea
           >
             <div className="mx-auto mt-2.5 h-1.5 w-12 rounded-full bg-line sm:hidden" />
             <div className="flex items-center justify-between px-5 pb-2 pt-3">
-              <h3 className="font-display text-2xl uppercase tracking-wide">{title}</h3>
+              <h3 className="text-lg font-semibold">{title}</h3>
               <IconButton aria-label="Chiudi" onClick={onClose} className="size-9">
                 <X className="size-4" />
               </IconButton>
@@ -303,22 +299,23 @@ export function Sheet({ open, onClose, title, children, footer }: { open: boolea
               {children}
             </div>
             {footer && <div className="safe-bottom border-t border-line/60 px-5 pt-3">{footer}</div>}
-          </motion.div>
-        </motion.div>
+          </m.div>
+        </m.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body,
   )
 }
 
 /* ---------- Stati vuoti / caricamento ---------- */
 export function Empty({ icon, title, text, action }: { icon?: ReactNode; title: string; text?: string; action?: ReactNode }) {
   return (
-    <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} className="card flex flex-col items-center gap-2 px-6 py-10 text-center">
-      {icon && <div className="mb-1 grid size-14 place-items-center rounded-2xl bg-gold/10 text-gold">{icon}</div>}
-      <div className="font-display text-xl uppercase tracking-wide">{title}</div>
+    <m.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }} className="card flex flex-col items-center gap-1.5 px-6 py-8 text-center">
+      {icon && <div className="mb-1 text-muted [&_svg]:size-6 [&_svg]:stroke-[1.75]">{icon}</div>}
+      <div className="text-base font-semibold">{title}</div>
       {text && <p className="max-w-xs text-sm text-muted">{text}</p>}
       {action && <div className="mt-3">{action}</div>}
-    </motion.div>
+    </m.div>
   )
 }
 
@@ -339,9 +336,7 @@ export function Loading({ rows = 3 }: { rows?: number }) {
 export function Spinner() {
   return (
     <div className="grid min-h-[60dvh] place-items-center">
-      <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1.2, ease: 'linear' }}>
-        <Logo size={72} />
-      </motion.div>
+      <Loader2 className="size-8 animate-spin text-gold" aria-label="Caricamento" />
     </div>
   )
 }
@@ -355,7 +350,7 @@ export function Ring({ value, size = 76, stroke = 8, color = 'var(--color-gold)'
     <div className="relative grid place-items-center" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">
         <circle cx={size / 2} cy={size / 2} r={r} stroke="rgba(255,255,255,0.08)" strokeWidth={stroke} fill="none" />
-        <motion.circle cx={size / 2} cy={size / 2} r={r} stroke={color} strokeWidth={stroke} fill="none" strokeLinecap="round" strokeDasharray={c} initial={{ strokeDashoffset: c }} animate={{ strokeDashoffset: c * (1 - v) }} transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }} />
+        <m.circle cx={size / 2} cy={size / 2} r={r} stroke={color} strokeWidth={stroke} fill="none" strokeLinecap="round" strokeDasharray={c} initial={{ strokeDashoffset: c }} animate={{ strokeDashoffset: c * (1 - v) }} transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }} />
       </svg>
       <div className="absolute inset-0 grid place-items-center">{children}</div>
     </div>

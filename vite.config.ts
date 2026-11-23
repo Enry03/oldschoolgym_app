@@ -46,10 +46,9 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks(id: string) {
-          if (id.includes('recharts') || id.includes('d3-')) return 'charts'
-          if (id.includes('@zxing')) return 'scanner'
+          // solo supabase a parte: forzare grafici e scanner in chunk fissi
+          // li faceva precaricare su ogni pagina (anche la home pubblica)
           if (id.includes('@supabase')) return 'supabase'
-          if (id.includes('framer-motion')) return 'motion'
         },
       },
     },
