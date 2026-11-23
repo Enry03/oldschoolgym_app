@@ -55,7 +55,7 @@ export function Login() {
     setBusy(false)
     setCaptchaReset((n) => n + 1)
     if (error) return toast.error(errMsg(error))
-    toast.success('Bentornato!')
+    toast.success('Bentornato')
     nav(loc.state?.from ?? '/app', { replace: true })
   }
 
@@ -159,7 +159,7 @@ export function Register() {
     setCaptchaReset((n) => n + 1)
     if (error) return toast.error(errMsg(error))
     if (!data.session) setSent(true)
-    else toast.success('Richiesta inviata! La palestra deve approvare la tua iscrizione.')
+    else toast.success('Richiesta inviata. La palestra deve approvare la tua iscrizione')
   }
 
   if (sent)

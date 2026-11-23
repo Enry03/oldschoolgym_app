@@ -201,7 +201,6 @@ export default function Kiosk() {
 
   return (
     <div className="relative flex min-h-dvh select-none flex-col items-center justify-between overflow-hidden bg-ink p-6 text-cream" onDoubleClick={fullscreen}>
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-96 bg-[radial-gradient(ellipse_at_top,rgba(245,197,24,0.18),transparent_70%)]" />
       <header className="relative flex w-full items-center justify-between">
         <div className="flex items-center gap-3">
           <Logo size={64} />
@@ -216,7 +215,7 @@ export default function Kiosk() {
       </header>
 
       <main className="relative flex flex-col items-center">
-        <div className="relative rounded-[2rem] bg-white p-6 shadow-[0_30px_100px_-30px_rgba(245,197,24,0.7)]">
+        <div className="relative rounded-[2rem] bg-white p-6">
           {data ? (
             <m.div key={data.code} initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.25 }}>
               <QRCodeSVG value={`OSGK:${data.code}`} size={Math.min(window.innerWidth, window.innerHeight) * 0.5} level="M" fgColor="#0B2A55" bgColor="#ffffff" />
@@ -276,7 +275,7 @@ export default function Kiosk() {
                 {shown.outcome === 'denied' ? shown.name : `Ciao ${shown.name}!`}
               </m.div>
               <div className="mt-4 text-[4vmin] font-bold">
-                {shown.outcome === 'ok' && 'Ingresso registrato. Buon allenamento!'}
+                {shown.outcome === 'ok' && 'Ingresso registrato. Buon allenamento'}
                 {shown.outcome === 'duplicate' && 'Eri già entrato oggi'}
                 {shown.outcome === 'denied' && 'Ingresso non consentito: passa in reception'}
               </div>

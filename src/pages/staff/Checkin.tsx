@@ -111,7 +111,7 @@ export default function Checkin() {
         {on && (
           <>
             <div className="pointer-events-none absolute inset-10 rounded-3xl border-2 border-gold/80" />
-            <m.div className="pointer-events-none absolute inset-x-10 h-0.5 bg-gold shadow-[0_0_16px_#F5C518]" animate={{ top: ['12%', '86%', '12%'] }} transition={{ repeat: Infinity, duration: 2.4, ease: 'easeInOut' }} />
+            <m.div className="pointer-events-none absolute inset-x-10 h-0.5 bg-gold" animate={{ top: ['12%', '86%', '12%'] }} transition={{ repeat: Infinity, duration: 2.4, ease: 'easeInOut' }} />
           </>
         )}
         <AnimatePresence>

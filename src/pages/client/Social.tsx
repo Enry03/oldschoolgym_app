@@ -266,7 +266,7 @@ export function InvitePage() {
     const { error } = await supabase.from('leads').insert({ full_name: f.full_name, phone: f.phone, trial_date: f.trial_date || null, source: 'Pass ospite', status: 'new', referred_by: profile!.id, notes: `Invitato da ${fullName(profile)}` })
     setBusy(false)
     if (error) return toast.error(errMsg(error))
-    toast.success('Pass ospite richiesto! La reception lo confermerà.')
+    toast.success('Pass ospite richiesto, la reception lo confermerà')
     setF({ full_name: '', phone: '', trial_date: '' })
   }
 

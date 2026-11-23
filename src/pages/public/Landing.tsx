@@ -146,7 +146,7 @@ export default function Landing() {
 
       {/* COME FUNZIONA */}
       <Section title="Come funziona">
-        <ol className="no-scrollbar -mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-1">
+        <ol className="no-scrollbar -mx-4 flex snap-x scroll-px-4 gap-3 overflow-x-auto px-4 pb-1">
           {STEPS.map((s, i) => (
             <li key={s.t} className="w-36 shrink-0 snap-start rounded-xl border border-line/60 bg-surface p-3">
               <div className="flex items-center justify-between text-muted">

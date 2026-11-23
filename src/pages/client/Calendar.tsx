@@ -48,7 +48,7 @@ export default function ClientCalendar() {
     const { data: st, error } = await supabase.rpc('book_session', { p_session: s.id })
     setBusy(false)
     if (error) return toast.error(errMsg(error))
-    toast.success(st === 'booked' ? 'Posto prenotato!' : "Sei in lista d'attesa: ti avvisiamo se si libera un posto")
+    toast.success(st === 'booked' ? 'Posto prenotato' : "Sei in lista d'attesa: ti avvisiamo se si libera un posto")
     setSel(null)
     reload()
   }
@@ -75,7 +75,7 @@ export default function ClientCalendar() {
             return (
               <button key={d.toISOString()} onClick={() => setDay(d)} className={`relative flex w-14 shrink-0 flex-col items-center rounded-2xl py-2.5 transition ${active ? 'text-ink' : 'bg-surface/60 text-cream'}`}>
                 {active && <m.span layoutId="day-pill" className="absolute inset-0 rounded-2xl bg-gold" transition={{ type: 'spring', stiffness: 500, damping: 36 }} />}
-                <span className="relative text-[10px] font-bold uppercase opacity-70">{format(d, 'EEE', { locale: it })}</span>
+                <span className="relative text-[10px] font-medium opacity-70">{format(d, 'EEE', { locale: it })}</span>
                 <span className="relative font-display text-2xl leading-tight">{format(d, 'd')}</span>
                 <span className={`relative size-1.5 rounded-full ${has ? (active ? 'bg-ink' : 'bg-gold') : 'bg-transparent'}`} />
               </button>
@@ -127,7 +127,7 @@ export default function ClientCalendar() {
                   <div className="flex w-16 shrink-0 flex-col justify-center py-4">
                     <div className="font-display text-2xl leading-none">{fmtTime(s.starts_at)}</div>
                     <div className="text-[11px] text-muted">{fmtTime(s.ends_at)}</div>
-                    {filter === 'mine' && <div className="mt-1 text-[10px] uppercase text-gold">{format(new Date(s.starts_at), 'EEE d', { locale: it })}</div>}
+                    {filter === 'mine' && <div className="mt-1 text-[11px] text-gold">{format(new Date(s.starts_at), 'EEE d', { locale: it })}</div>}
                   </div>
                   <div className="min-w-0 flex-1 py-4 pr-4">
                     <div className="flex items-center gap-2">

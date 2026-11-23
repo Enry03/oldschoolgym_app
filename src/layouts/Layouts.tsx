@@ -157,7 +157,7 @@ function AcceptRules() {
     setBusy(false)
     if (error) return toast.error(errMsg(error))
     await refreshProfile()
-    toast.success('Grazie, buon allenamento!')
+    toast.success('Grazie, buon allenamento')
   }
   return (
     <div className="grid min-h-dvh place-items-center p-6">

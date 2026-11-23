@@ -133,7 +133,7 @@ const badgeTones = {
   gray: 'bg-white/8 text-muted',
 }
 export function Badge({ tone = 'gray', children, className }: { tone?: keyof typeof badgeTones; children: ReactNode; className?: string }) {
-  return <span className={clsx('inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold', badgeTones[tone], className)}>{children}</span>
+  return <span className={clsx('inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium', badgeTones[tone], className)}>{children}</span>
 }
 
 /* ---------- Avatar ---------- */
@@ -141,7 +141,7 @@ export function Avatar({ p, size = 44, ring }: { p?: { first_name?: string | nul
   const url = publicUrl('avatars', p?.avatar_url)
   return (
     <span
-      className={clsx('relative inline-grid shrink-0 place-items-center overflow-hidden rounded-full bg-gradient-to-br from-navy-bright to-navy font-varsity text-cream', ring && 'ring-2 ring-gold ring-offset-2 ring-offset-ink')}
+      className={clsx('relative inline-grid shrink-0 place-items-center overflow-hidden rounded-full bg-surface-2 font-semibold text-cream', ring && 'ring-2 ring-gold ring-offset-2 ring-offset-ink')}
       style={{ width: size, height: size, fontSize: size * 0.36 }}
     >
       {url ? <img src={url} alt="" className="size-full object-cover" loading="lazy" /> : initials(p)}
@@ -160,15 +160,12 @@ export function PhotoPlaceholder({ label = 'Foto in arrivo', className, tone = '
     <div
       className={clsx(
         'relative flex flex-col items-center justify-center gap-2 overflow-hidden text-center',
-        tone === 'navy' && 'bg-gradient-to-br from-navy via-surface-2 to-ink',
-        tone === 'gold' && 'bg-gradient-to-br from-gold-deep via-gold to-gold-soft text-ink',
-        tone === 'dark' && 'bg-gradient-to-br from-surface to-ink',
+        tone === 'gold' ? 'bg-gold text-ink' : 'bg-surface-2',
         className,
       )}
     >
-      <div className="stripes absolute inset-0 opacity-40" />
-      <Camera className={clsx('relative size-7', tone === 'gold' ? 'text-ink/60' : 'text-gold/70')} />
-      <span className={clsx('relative font-varsity text-[11px] uppercase tracking-widest', tone === 'gold' ? 'text-ink/70' : 'text-cream/60')}>{label}</span>
+      <Camera className={clsx('size-5', tone === 'gold' ? 'text-ink/60' : 'text-muted')} strokeWidth={1.75} />
+      <span className={clsx('text-xs', tone === 'gold' ? 'text-ink/70' : 'text-muted')}>{label}</span>
     </div>
   )
 }
@@ -203,7 +200,7 @@ export function SectionTitle({ children, action }: { children: ReactNode; action
 }
 
 /* ---------- Stat ---------- */
-export function Stat({ label, value, sub, tone = 'surface', icon, onClick }: { label: string; value: ReactNode; sub?: ReactNode; tone?: 'surface' | 'gold' | 'navy' | 'cream'; icon?: ReactNode; onClick?: () => void }) {
+export function Stat({ label, value, sub, tone = 'surface', onClick }: { label: string; value: ReactNode; sub?: ReactNode; tone?: 'surface' | 'gold' | 'navy' | 'cream'; icon?: ReactNode; onClick?: () => void }) {
   return (
     <m.button
       type="button"
@@ -220,7 +217,6 @@ export function Stat({ label, value, sub, tone = 'surface', icon, onClick }: { l
     >
       <div className="flex items-start justify-between gap-2">
         <span className={clsx('text-xs font-medium', tone === 'surface' ? 'text-muted' : 'opacity-75')}>{label}</span>
-        {icon && <span className="opacity-70">{icon}</span>}
       </div>
       <div className="mt-2 font-display text-3xl leading-none tabular-nums">{value}</div>
       {sub && <div className={clsx('mt-1.5 text-xs', tone === 'surface' ? 'text-muted' : 'opacity-75')}>{sub}</div>}
@@ -234,7 +230,7 @@ export function Segmented<T extends string>({ value, onChange, options, classNam
     <div className={clsx('no-scrollbar flex gap-1 overflow-x-auto rounded-2xl bg-night p-1', className)}>
       {options.map((o) => (
         <button key={o.value} onClick={() => onChange(o.value)} className={clsx('relative shrink-0 flex-1 whitespace-nowrap rounded-xl px-3 py-2 text-sm font-semibold transition-colors', value === o.value ? 'text-ink' : 'text-muted hover:text-cream')}>
-          {value === o.value && <m.span layoutId={`seg-${options.map((x) => x.value).join('')}`} className="absolute inset-0 rounded-xl bg-gold" transition={{ type: 'spring', stiffness: 500, damping: 38 }} />}
+          {value === o.value && <m.span layoutId={`seg-${options.map((x) => x.value).join('')}`} className="absolute inset-0 rounded-xl bg-gold" transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }} />}
           <span className="relative">{o.label}</span>
         </button>
       ))}
@@ -250,7 +246,7 @@ export function Chips<T extends string>({ value, onChange, options }: { value: T
         <button
           key={o.value}
           onClick={() => onChange(o.value)}
-          className={clsx('shrink-0 rounded-full border px-4 py-2 text-sm font-semibold transition', value === o.value ? 'border-gold bg-gold text-ink' : 'border-line text-cream/80 hover:border-gold/50')}
+          className={clsx('shrink-0 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors', value === o.value ? 'border-gold bg-gold text-ink' : 'border-line text-cream/80 hover:border-gold/50')}
         >
           {o.label}
         </button>
@@ -311,8 +307,8 @@ export function Sheet({ open, onClose, title, children, footer }: { open: boolea
 /* ---------- Stati vuoti / caricamento ---------- */
 export function Empty({ icon, title, text, action }: { icon?: ReactNode; title: string; text?: string; action?: ReactNode }) {
   return (
-    <m.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} className="card flex flex-col items-center gap-2 px-6 py-10 text-center">
-      {icon && <div className="mb-1 grid size-14 place-items-center rounded-2xl bg-gold/10 text-gold">{icon}</div>}
+    <m.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }} className="card flex flex-col items-center gap-1.5 px-6 py-8 text-center">
+      {icon && <div className="mb-1 text-muted [&_svg]:size-6 [&_svg]:stroke-[1.75]">{icon}</div>}
       <div className="text-base font-semibold">{title}</div>
       {text && <p className="max-w-xs text-sm text-muted">{text}</p>}
       {action && <div className="mt-3">{action}</div>}

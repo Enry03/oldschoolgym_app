@@ -14,7 +14,7 @@ export default function QrPass() {
   return (
     <div className="flex min-h-[78dvh] flex-col items-center justify-center text-center">
       <M.div initial={{ opacity: 0, scale: 0.9, rotateX: 30 }} animate={{ opacity: 1, scale: 1, rotateX: 0 }} transition={{ type: 'spring', stiffness: 140, damping: 16 }} className="w-full max-w-xs">
-        <div className="relative overflow-hidden rounded-[2rem] bg-cream p-6 text-ink shadow-[0_30px_80px_-30px_rgba(245,197,24,0.6)]">
+        <div className="relative overflow-hidden rounded-[2rem] bg-cream p-6 text-ink">
           <div className="absolute inset-x-0 top-0 h-2 bg-gold" />
           <div className="flex items-center gap-3">
             <Avatar p={profile} size={48} />
@@ -26,7 +26,7 @@ export default function QrPass() {
           </div>
           <M.div className="relative mx-auto mt-6 w-fit rounded-3xl bg-white p-4" initial={{ scale: 0.8 }} animate={{ scale: 1 }} transition={{ delay: 0.2, type: 'spring' }}>
             {profile && <QRCodeSVG value={`OSG:${profile.qr_token}`} size={210} level="M" fgColor="#0B2A55" bgColor="#ffffff" />}
-            <M.div className="pointer-events-none absolute inset-x-4 h-0.5 rounded-full bg-gold shadow-[0_0_12px_#F5C518]" initial={{ top: 16 }} animate={{ top: [16, 226, 16] }} transition={{ repeat: Infinity, duration: 2.6, ease: 'easeInOut' }} />
+            <M.div className="pointer-events-none absolute inset-x-4 h-0.5 rounded-full bg-gold" initial={{ top: 16 }} animate={{ top: [16, 226, 16] }} transition={{ repeat: Infinity, duration: 2.6, ease: 'easeInOut' }} />
           </M.div>
           <div className="mt-5 flex items-center justify-center gap-2">
             {ok ? (

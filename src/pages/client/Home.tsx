@@ -61,8 +61,8 @@ export default function ClientHome() {
           <Avatar p={profile} size={44} />
         </Link>
         <div className="min-w-0 flex-1">
-          <div className="text-xs text-muted">{greeting()}</div>
-          <div className="truncate text-lg font-semibold leading-tight">{profile?.first_name || 'Ciao'}</div>
+          {profile?.first_name && <div className="text-xs text-muted">{greeting()}</div>}
+          <div className="truncate text-lg font-semibold leading-tight">{profile?.first_name || greeting()}</div>
         </div>
         <IconButton aria-label="Notifiche" badge={unread} onClick={() => nav('/app/notifiche')}>
           <Bell className="size-5" />

@@ -61,7 +61,7 @@ function PlanTab() {
 
   if (loading) return <Loading rows={4} />
   if (!plans?.length)
-    return <Empty icon={<ClipboardList className="size-7" />} title="Nessuna scheda" text="Il tuo trainer non ti ha ancora assegnato una scheda. Chiedila in sala o scrivigli dall'app!" />
+    return <Empty icon={<ClipboardList className="size-7" />} title="Nessuna scheda" text="Il tuo trainer non ti ha ancora assegnato una scheda. Chiedila in sala o scrivigli dall'app" />
 
   const today = isoDate()
   const items = days.find(([d]) => d === day)?.[1] ?? []
@@ -115,7 +115,7 @@ function PlanTab() {
               {lastW != null && (
                 <div className="text-right">
                   <div className="font-display text-xl leading-none">{lastW}</div>
-                  <div className="text-[10px] uppercase text-muted">kg ultimo</div>
+                  <div className="text-[11px] text-muted">kg ultimo</div>
                 </div>
               )}
             </m.button>
@@ -306,7 +306,7 @@ export function ProgressTab({ userId, readOnly }: { userId?: string; readOnly?: 
         <div className="mt-3 grid grid-cols-3 gap-2">
           {measureFields.slice(3).map((f) => (
             <div key={f.key} className="rounded-2xl bg-surface/60 p-3 text-center">
-              <div className="text-[10px] uppercase tracking-wider text-muted">{f.label}</div>
+              <div className="text-[11px] text-muted">{f.label}</div>
               <div className="font-display text-xl">{(last[f.key] as number | null) ?? '—'}</div>
               {delta(f.key) != null && <div className={`text-[10px] ${delta(f.key)! <= 0 ? 'text-success' : 'text-gold'}`}>{delta(f.key)! > 0 ? '+' : ''}{delta(f.key)}</div>}
             </div>
@@ -391,7 +391,7 @@ function GoalsBlock() {
   }
   async function toggle(g: Goal) {
     await supabase.from('goals').update({ is_done: !g.is_done }).eq('id', g.id)
-    if (!g.is_done) toast.success('Obiettivo raggiunto!')
+    if (!g.is_done) toast.success('Obiettivo raggiunto')
     reload()
   }
   async function remove(g: Goal) {

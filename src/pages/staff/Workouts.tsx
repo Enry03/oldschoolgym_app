@@ -196,7 +196,7 @@ export function PlanEditor({ plan, userId, template, onDone }: { plan: WorkoutPl
               <Input aria-label="Recupero secondi" inputMode="numeric" value={it.rest_sec ?? ''} onChange={(e) => update(it.key, { rest_sec: Number(e.target.value) || null })} className="!px-2 text-center" />
               <Input aria-label="Carico" value={it.load_note ?? ''} placeholder="kg" onChange={(e) => update(it.key, { load_note: e.target.value || null })} className="!px-2 text-center" />
             </div>
-            <div className="mt-1 grid grid-cols-4 gap-2 text-center text-[10px] uppercase text-muted">
+            <div className="mt-1 grid grid-cols-4 gap-2 text-center text-[11px] text-muted">
               <span>serie</span>
               <span>reps</span>
               <span>rec. sec</span>

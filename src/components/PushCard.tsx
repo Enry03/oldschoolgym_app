@@ -122,14 +122,8 @@ export function PushBanner() {
             exit={{ opacity: 0, y: -8, height: 0 }}
             className="mb-4 overflow-hidden"
           >
-            <div className="relative flex items-center gap-3 rounded-2xl border border-gold/40 bg-gold/10 p-3 pr-10">
-              <m.span
-                animate={{ rotate: [0, -14, 12, -8, 0] }}
-                transition={{ duration: 1.2, repeat: Infinity, repeatDelay: 3 }}
-                className="grid size-10 shrink-0 place-items-center rounded-xl bg-gold text-ink"
-              >
-                <BellRing className="size-5" />
-              </m.span>
+            <div className="relative flex items-center gap-3 rounded-xl border border-line/50 bg-surface p-3 pr-10">
+              <BellRing className="size-[18px] shrink-0 text-gold" strokeWidth={1.75} />
               <div className="min-w-0 flex-1">
                 <div className="text-sm font-semibold">Non perderti nessuna lezione</div>
                 <div className="text-xs text-cream/70">Ricevi promemoria e posti liberi sul telefono.</div>

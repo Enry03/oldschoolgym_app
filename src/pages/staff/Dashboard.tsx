@@ -1,6 +1,6 @@
 import { PushBanner } from '../../components/PushCard'
 import PendingSignups from '../../components/PendingSignups'
-import { AlertTriangle, Bell, CalendarClock, ChevronRight, FileWarning, ScanLine, UserPlus, Users, Wallet } from 'lucide-react'
+import { AlertTriangle, Bell, CalendarClock, ChevronRight, FileWarning } from 'lucide-react'
 import { lazy, Suspense } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Avatar, Badge, Card, IconButton, SectionTitle, Skeleton, Stat } from '../../components/ui'
@@ -45,8 +45,8 @@ export default function StaffDashboard() {
       <PushBanner />
       <div className="mb-5 flex items-center gap-3">
         <div className="min-w-0 flex-1">
-          <div className="text-xs text-muted">{greeting()}</div>
-          <h1 className="truncate text-lg font-semibold leading-tight">{profile?.first_name}</h1>
+          {profile?.first_name && <div className="text-xs text-muted">{greeting()}</div>}
+          <h1 className="truncate text-lg font-semibold leading-tight">{profile?.first_name || greeting()}</h1>
         </div>
         <IconButton aria-label="Notifiche" badge={unread} onClick={() => nav('/app/notifiche')}>
           <Bell className="size-5" />
@@ -67,14 +67,14 @@ export default function StaffDashboard() {
       ) : (
         <>
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-            <Stat tone="gold" label="In sala ora" value={d.in_gym_now} sub={`${d.checkins_today} ingressi oggi`} icon={<ScanLine className="size-4" />} onClick={() => nav('/staff/checkin')} />
-            <Stat label="Iscritti attivi" value={d.active_members} sub={`su ${d.total_clients} clienti`} icon={<Users className="size-4" />} onClick={() => nav('/staff/clienti')} />
+            <Stat tone="gold" label="In sala ora" value={d.in_gym_now} sub={`${d.checkins_today} ingressi oggi`} onClick={() => nav('/staff/checkin')} />
+            <Stat label="Iscritti attivi" value={d.active_members} sub={`su ${d.total_clients} clienti`} onClick={() => nav('/staff/clienti')} />
             {isFront ? (
-              <Stat label="Incassi mese" value={euro(d.revenue_month_cents ?? 0)} sub={d.pending_payments_cents ? `${euro(d.pending_payments_cents)} da incassare` : 'Nessun sospeso'} icon={<Wallet className="size-4" />} onClick={() => nav('/staff/statistiche')} />
+              <Stat label="Incassi mese" value={euro(d.revenue_month_cents ?? 0)} sub={d.pending_payments_cents ? `${euro(d.pending_payments_cents)} da incassare` : 'Nessun sospeso'} onClick={() => nav('/staff/statistiche')} />
             ) : (
-              <Stat label="Lezioni oggi" value={d.today_sessions.length} icon={<CalendarClock className="size-4" />} />
+              <Stat label="Lezioni oggi" value={d.today_sessions.length} />
             )}
-            <Stat label="Richieste di prova" value={d.new_leads} sub="Dal sito" icon={<UserPlus className="size-4" />} onClick={() => nav('/staff/lead')} />
+            <Stat label="Richieste di prova" value={d.new_leads} sub="Dal sito" onClick={() => nav('/staff/lead')} />
           </div>
 
           {/* Da controllare: solo le voci che hanno qualcosa */}
@@ -129,9 +129,13 @@ export default function StaffDashboard() {
             <div>
               <SectionTitle>Ingressi ultimi 7 giorni</SectionTitle>
               <Card className="p-3">
-                <Suspense fallback={<Skeleton className="h-48" />}>
-                  <Charts kind="bar" data={d.checkins_week.map((w) => ({ x: fmtDate(w.day, 'EEE'), y: w.n }))} />
-                </Suspense>
+                {d.checkins_week.some((w) => w.n > 0) ? (
+                  <Suspense fallback={<Skeleton className="h-48" />}>
+                    <Charts kind="bar" data={d.checkins_week.map((w) => ({ x: fmtDate(w.day, 'EEE'), y: w.n }))} />
+                  </Suspense>
+                ) : (
+                  <p className="p-1 text-sm text-muted">Ancora nessun ingresso questa settimana</p>
+                )}
               </Card>
             </div>
           </div>

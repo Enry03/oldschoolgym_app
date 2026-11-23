@@ -248,7 +248,7 @@ export function StatsPage() {
       <SectionTitle>Clienti a rischio abbandono</SectionTitle>
       <p className="-mt-2 mb-3 text-xs text-muted">Abbonamento attivo ma nessun ingresso recente. Una telefonata può fare la differenza.</p>
       <div className="space-y-2">
-        {s.at_risk_clients.length === 0 && <p className="card p-4 text-sm text-muted">Nessuno: ottimo lavoro!</p>}
+        {s.at_risk_clients.length === 0 && <p className="card p-4 text-sm text-muted">Nessuno</p>}
         {s.at_risk_clients.map((c) => (
           <div key={c.id} className="card flex items-center gap-3 p-3">
             <Link to={`/staff/clienti/${c.id}`} className="flex-1">
