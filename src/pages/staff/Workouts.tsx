@@ -51,7 +51,7 @@ function Templates() {
           (data ?? []).map((t) => (
             <button key={t.id} onClick={() => setEditing(t)} className="card p-4 text-left transition hover:border-gold/40">
               <Badge tone="gold">{t.goal ?? 'Generale'}</Badge>
-              <div className="mt-2 font-display text-2xl uppercase leading-tight">{t.title}</div>
+              <div className="mt-2 text-xl font-semibold leading-tight">{t.title}</div>
               <div className="mt-1 text-xs text-muted">
                 {t.workout_plan_items?.length ?? 0} esercizi · {new Set(t.workout_plan_items?.map((i) => i.day_label)).size} giorni
               </div>
@@ -124,7 +124,7 @@ export function PlanEditor({ plan, userId, template, onDone }: { plan: WorkoutPl
       }
     }
     setBusy(false)
-    toast.success('Scheda salvata 💪')
+    toast.success('Scheda salvata')
     onDone()
   }
   async function remove() {

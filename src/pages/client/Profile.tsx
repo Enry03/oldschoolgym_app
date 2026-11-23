@@ -1,5 +1,5 @@
 import { PushToggle } from '../../components/PushCard'
-import { motion } from 'motion/react'
+import { m } from 'motion/react'
 import { Bell, Camera, ChevronRight, CreditCard, Download, FileHeart, Gift, KeyRound, LogOut, MessageCircle, Newspaper, Shield, Trash2, Upload } from 'lucide-react'
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
@@ -70,7 +70,7 @@ export default function Profile() {
   return (
     <div>
       <PageHeader title="Profilo" />
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="card flex items-center gap-4 p-5">
+      <m.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="card flex items-center gap-4 p-5">
         <label className="relative cursor-pointer">
           <Avatar p={profile} size={76} ring />
           <span className="absolute -bottom-1 -right-1 grid size-8 place-items-center rounded-full bg-gold text-ink ring-4 ring-surface">
@@ -79,13 +79,13 @@ export default function Profile() {
           <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(e) => e.target.files?.[0] && uploadAvatar(e.target.files[0])} />
         </label>
         <div className="min-w-0 flex-1">
-          <div className="truncate font-display text-2xl uppercase leading-none">{fullName(profile)}</div>
+          <div className="truncate text-xl font-semibold leading-none">{fullName(profile)}</div>
           <div className="mt-1 truncate text-sm text-muted">{profile?.email}</div>
           <Badge tone="gold" className="mt-2">
             {roleLabel[profile?.role ?? 'client']}
           </Badge>
         </div>
-      </motion.div>
+      </m.div>
       <Button variant="ghost" block className="mt-3" onClick={() => setEdit(true)}>
         Modifica dati personali
       </Button>
@@ -245,7 +245,7 @@ function DeleteSheet({ open, onClose }: { open: boolean; onClose: () => void }) 
       return toast.error(j.error ?? "Impossibile eliminare l'account")
     }
     await signOut()
-    toast.success('Account eliminato. Ci mancherai 🥊')
+    toast.success('Account eliminato. Ci mancherai')
     nav('/')
   }
   return (

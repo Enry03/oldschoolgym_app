@@ -1,8 +1,7 @@
 import { PushBanner } from '../../components/PushCard'
-import { motion } from 'motion/react'
 import { AlertTriangle, Bell, CalendarPlus, ChevronRight, Dumbbell, Gift, LineChart, MessageCircle, Newspaper, Users } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Avatar, Badge, Card, IconButton, PhotoPlaceholder, Ring, SectionTitle, Skeleton } from '../../components/ui'
+import { Avatar, Badge, IconButton, Ring, SectionTitle, Skeleton } from '../../components/ui'
 import { useAuth } from '../../context/AuthContext'
 import { daysUntil, fmtDate, fmtTime, greeting } from '../../lib/format'
 import { useAsync, useNotifications } from '../../lib/hooks'
@@ -57,15 +56,13 @@ export default function ClientHome() {
   return (
     <div>
       {/* Header */}
-      <div className="mb-6 flex items-center gap-3">
-        <Link to="/app/profilo">
-          <Avatar p={profile} size={52} ring />
+      <div className="mb-5 flex items-center gap-3">
+        <Link to="/app/profilo" aria-label="Profilo">
+          <Avatar p={profile} size={44} />
         </Link>
         <div className="min-w-0 flex-1">
-          <div className="text-sm text-muted">{greeting()} 👋</div>
-          <motion.div initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} className="truncate font-display text-3xl uppercase leading-none">
-            {profile?.first_name || 'Campione'}
-          </motion.div>
+          <div className="text-xs text-muted">{greeting()}</div>
+          <div className="truncate text-lg font-semibold leading-tight">{profile?.first_name || 'Ciao'}</div>
         </div>
         <IconButton aria-label="Notifiche" badge={unread} onClick={() => nav('/app/notifiche')}>
           <Bell className="size-5" />
@@ -75,144 +72,127 @@ export default function ClientHome() {
       {/* Avvisi */}
       <PushBanner />
       {cert === null || (certDays !== null && certDays < 15) ? (
-        <motion.button initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} onClick={() => nav('/app/profilo#certificato')} className="mb-4 flex w-full items-center gap-3 rounded-2xl border border-danger/40 bg-danger/10 p-3 text-left">
-          <AlertTriangle className="size-5 shrink-0 text-danger" />
+        <button onClick={() => nav('/app/profilo#certificato')} className="mb-3 flex w-full items-center gap-3 rounded-xl border border-danger/40 bg-danger/10 p-3 text-left">
+          <AlertTriangle className="size-[18px] shrink-0 text-danger" />
           <span className="flex-1 text-sm">
-            {cert === null ? 'Carica il certificato medico per poter entrare.' : certDays! < 0 ? 'Il certificato medico è scaduto.' : `Il certificato medico scade tra ${certDays} giorni.`}
+            {cert === null ? 'Carica il certificato medico per poter entrare' : certDays! < 0 ? 'Il certificato medico è scaduto' : `Il certificato medico scade tra ${certDays} giorni`}
           </span>
           <ChevronRight className="size-4 text-danger" />
-        </motion.button>
+        </button>
       ) : null}
 
-      {/* Abbonamento */}
+      {/* Abbonamento: l'unico elemento colorato della pagina */}
       {mLoading ? (
-        <Skeleton className="h-40" />
+        <Skeleton className="h-32" />
       ) : (
-        <motion.div initial={{ opacity: 0, y: 16, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ type: 'spring', stiffness: 200, damping: 22 }}>
-          <Link to="/app/abbonamento" className={`grain relative block overflow-hidden rounded-3xl p-5 ${active ? 'bg-gold text-ink' : 'bg-surface-2 text-cream'}`}>
-            <div className="stripes absolute -right-10 -top-10 size-40 rotate-12 opacity-50" />
-            <div className="relative flex items-center gap-4">
-              <div className="min-w-0 flex-1">
-                <div className="text-[11px] font-bold uppercase tracking-[0.15em] opacity-70">Il tuo abbonamento</div>
-                <div className="mt-1 truncate font-display text-3xl uppercase leading-none">{membership?.plan_name ?? 'Nessun piano'}</div>
-                <div className="mt-2 text-sm opacity-80">
-                  {!membership
-                    ? 'Passa in reception per attivarlo'
-                    : active
-                      ? membership.end_date
-                        ? `Valido fino al ${fmtDate(membership.end_date, 'd MMMM')}`
-                        : 'Attivo'
-                      : 'Scaduto: rinnovalo in reception'}
-                </div>
-                {membership?.entries_left != null && <Badge className="mt-3 !bg-ink !text-gold">{membership.entries_left} ingressi rimasti</Badge>}
+        <Link to="/app/abbonamento" className={`block rounded-2xl p-4 ${active ? 'bg-gold text-ink' : 'border border-line/50 bg-surface text-cream'}`}>
+          <div className="flex items-center gap-4">
+            <div className="min-w-0 flex-1">
+              <div className="text-xs font-medium opacity-70">Il tuo abbonamento</div>
+              <div className="mt-1 truncate text-xl font-semibold leading-tight">{membership?.plan_name ?? 'Nessun piano attivo'}</div>
+              <div className="mt-1 text-sm opacity-75">
+                {!membership
+                  ? 'Passa in reception per attivarlo'
+                  : active
+                    ? membership.end_date
+                      ? `Valido fino al ${fmtDate(membership.end_date, 'd MMMM')}`
+                      : 'Attivo'
+                    : 'Scaduto, rinnovalo in reception'}
               </div>
-              {active && left !== null && (
-                <Ring value={left / total} size={88} stroke={9} color="#060E1C">
+            </div>
+            {active && membership?.entries_left != null ? (
+              <div className="text-center">
+                <div className="font-display text-4xl leading-none tabular-nums">{membership.entries_left}</div>
+                <div className="mt-1 text-[11px] font-medium opacity-70">ingressi</div>
+              </div>
+            ) : (
+              active &&
+              left !== null && (
+                <Ring value={left / total} size={72} stroke={7} color="#060E1C">
                   <div className="text-center">
-                    <div className="font-display text-3xl leading-none">{left}</div>
-                    <div className="text-[10px] font-bold uppercase">giorni</div>
+                    <div className="font-display text-2xl leading-none tabular-nums">{left}</div>
+                    <div className="text-[10px] font-medium">giorni</div>
                   </div>
                 </Ring>
-              )}
-            </div>
-          </Link>
-        </motion.div>
-      )}
-
-      {/* Affluenza */}
-      <Card initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="mt-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="relative flex size-2.5">
-              <span className="absolute inline-flex size-full animate-ping rounded-full bg-success opacity-75" />
-              <span className="relative inline-flex size-2.5 rounded-full bg-success" />
-            </span>
-            <span className="label">Affluenza ora</span>
+              )
+            )}
           </div>
-          <span className="text-sm font-semibold">{occ < 0.35 ? 'Tranquilla' : occ < 0.7 ? 'Media' : 'Piena'}</span>
-        </div>
-        <div className="mt-3 flex items-end gap-1 h-14">
-          {(occupancy?.by_hour ?? []).map((b) => {
-            const max = Math.max(1, ...(occupancy?.by_hour ?? []).map((x) => x.n))
-            const isNow = b.h === new Date().getHours()
-            return (
-              <motion.div key={b.h} className={`flex-1 rounded-t-md ${isNow ? 'bg-gold' : 'bg-navy-bright/50'}`} initial={{ height: 0 }} animate={{ height: `${Math.max(6, (b.n / max) * 100)}%` }} transition={{ delay: 0.2 + b.h * 0.02, type: 'spring', stiffness: 120 }} title={`${b.h}:00`} />
-            )
-          })}
-        </div>
-        <div className="mt-1 flex justify-between text-[10px] text-muted">
-          <span>6:00</span>
-          <span>14:00</span>
-          <span>22:00</span>
-        </div>
-      </Card>
-
-      {/* Prossime lezioni */}
-      <SectionTitle action={<Link to="/app/calendario" className="text-xs font-semibold text-gold">Calendario</Link>}>Prossime lezioni</SectionTitle>
-      {next && next.length > 0 ? (
-        <div className="space-y-3">
-          {next.map((s, i) => (
-            <motion.div key={s.id} initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.08 }}>
-              <Link to="/app/calendario" className="card flex items-center gap-4 p-4">
-                <div className="grid w-14 shrink-0 place-items-center rounded-xl bg-night py-2">
-                  <div className="font-display text-2xl leading-none">{fmtTime(s.starts_at)}</div>
-                  <div className="text-[10px] uppercase text-muted">{fmtDate(s.starts_at, 'EEE d')}</div>
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="truncate font-semibold">{s.title}</div>
-                  <div className="text-xs text-muted">{s.trainer_name ?? 'Staff OldSchool'}</div>
-                </div>
-                <Badge tone={s.my_status === 'booked' ? 'green' : 'gold'}>{s.my_status === 'booked' ? 'Prenotato' : 'In attesa'}</Badge>
-              </Link>
-            </motion.div>
-          ))}
-        </div>
-      ) : (
-        <Link to="/app/calendario" className="card flex items-center gap-4 p-4">
-          <div className="grid size-12 place-items-center rounded-xl bg-gold/15 text-gold">
-            <CalendarPlus className="size-6" />
-          </div>
-          <div className="flex-1">
-            <div className="font-semibold">Nessuna lezione prenotata</div>
-            <div className="text-xs text-muted">Scegli un corso e prenota il tuo posto</div>
-          </div>
-          <ChevronRight className="size-5 text-muted" />
         </Link>
       )}
 
-      {/* Azioni rapide */}
-      <SectionTitle>Scorciatoie</SectionTitle>
-      <div className="grid grid-cols-3 gap-3">
-        {[
-          { to: '/app/allenamento', icon: Dumbbell, label: 'Scheda', tone: 'bg-navy-bright text-white' },
-          { to: '/app/allenamento?tab=progressi', icon: LineChart, label: 'Progressi', tone: 'bg-cream text-ink' },
-          { to: '/app/messaggi', icon: MessageCircle, label: 'Trainer', tone: 'bg-surface-2 text-cream' },
-          { to: '/app/news', icon: Newspaper, label: 'News', tone: 'bg-surface-2 text-cream' },
-          { to: '/app/invita', icon: Gift, label: 'Invita', tone: 'bg-gold text-ink' },
-          { to: '/app/personal', icon: Users, label: 'Personal', tone: 'bg-surface-2 text-cream' },
-        ].map((a, i) => (
-          <motion.div key={a.to} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.05 * i }} whileTap={{ scale: 0.94 }}>
-            <Link to={a.to} className={`flex aspect-square flex-col justify-between rounded-2xl p-3 ${a.tone}`}>
-              <a.icon className="size-6" />
-              <span className="text-sm font-bold">{a.label}</span>
-            </Link>
-          </motion.div>
-        ))}
-      </div>
+      {/* Affluenza: in una palestra da 8 posti basta sapere quanti ci sono ora */}
+      {occupancy && (
+        <div className="card mt-3 flex items-center gap-3 p-4">
+          <span className="size-2 shrink-0 rounded-full bg-success" />
+          <span className="flex-1 text-sm">In sala ora</span>
+          <span className="text-sm font-semibold tabular-nums">
+            {occupancy.now} su {occupancy.capacity}
+          </span>
+          <span className="text-xs text-muted">{occ < 0.35 ? 'tranquilla' : occ < 0.7 ? 'media' : 'piena'}</span>
+        </div>
+      )}
 
-      {/* News */}
-      <SectionTitle action={<Link to="/app/news" className="text-xs font-semibold text-gold">Tutte</Link>}>Bacheca</SectionTitle>
-      <div className="no-scrollbar -mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-2">
-        {(news ?? []).map((n) => (
-          <Link key={n.id} to="/app/news" className="card w-64 shrink-0 snap-start overflow-hidden p-0">
-            <PhotoPlaceholder label={n.category} className="aspect-[16/9]" />
-            <div className="p-3">
-              <Badge tone="gold">{n.category}</Badge>
-              <div className="mt-2 line-clamp-2 font-semibold">{n.title}</div>
-            </div>
+      {/* Prossime lezioni */}
+      <SectionTitle action={<Link to="/app/calendario" className="text-xs font-medium text-gold">Calendario</Link>}>Prossime lezioni</SectionTitle>
+      {next && next.length > 0 ? (
+        <div className="card divide-y divide-line/50 p-0">
+          {next.map((s) => (
+            <Link key={s.id} to="/app/calendario" className="flex items-center gap-3 p-4">
+              <div className="w-12 shrink-0 text-center">
+                <div className="text-base font-semibold tabular-nums leading-none">{fmtTime(s.starts_at)}</div>
+                <div className="mt-1 text-[11px] text-muted">{fmtDate(s.starts_at, 'EEE d')}</div>
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="truncate font-medium">{s.title}</div>
+                <div className="text-xs text-muted">{s.trainer_name ?? 'Staff OldSchool'}</div>
+              </div>
+              <Badge tone={s.my_status === 'booked' ? 'green' : 'gold'}>{s.my_status === 'booked' ? 'Prenotato' : 'In attesa'}</Badge>
+            </Link>
+          ))}
+        </div>
+      ) : (
+        <Link to="/app/calendario" className="card flex items-center gap-3 p-4">
+          <CalendarPlus className="size-[18px] text-muted" />
+          <div className="flex-1 text-sm">Nessuna lezione prenotata</div>
+          <ChevronRight className="size-4 text-muted" />
+        </Link>
+      )}
+
+      {/* Scorciatoie */}
+      <SectionTitle>Scorciatoie</SectionTitle>
+      <div className="grid grid-cols-3 gap-2">
+        {[
+          { to: '/app/allenamento', icon: Dumbbell, label: 'Scheda' },
+          { to: '/app/allenamento?tab=progressi', icon: LineChart, label: 'Progressi' },
+          { to: '/app/messaggi', icon: MessageCircle, label: 'Trainer' },
+          { to: '/app/news', icon: Newspaper, label: 'Bacheca' },
+          { to: '/app/invita', icon: Gift, label: 'Invita' },
+          { to: '/app/personal', icon: Users, label: 'Personal' },
+        ].map((a) => (
+          <Link key={a.to} to={a.to} className="card flex flex-col items-start gap-3 p-3 transition-colors active:bg-surface-2">
+            <a.icon className="size-[18px] text-gold" strokeWidth={1.75} />
+            <span className="text-sm font-medium">{a.label}</span>
           </Link>
         ))}
       </div>
+
+      {/* Bacheca */}
+      {news && news.length > 0 && (
+        <>
+          <SectionTitle action={<Link to="/app/news" className="text-xs font-medium text-gold">Tutte</Link>}>Bacheca</SectionTitle>
+          <div className="card divide-y divide-line/50 p-0">
+            {news.map((n) => (
+              <Link key={n.id} to="/app/news" className="flex items-center gap-3 p-4">
+                <div className="min-w-0 flex-1">
+                  <div className="text-xs text-muted">{n.category}</div>
+                  <div className="truncate font-medium">{n.title}</div>
+                </div>
+                <ChevronRight className="size-4 text-muted" />
+              </Link>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   )
 }

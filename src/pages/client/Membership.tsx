@@ -1,4 +1,4 @@
-import { motion } from 'motion/react'
+import { m } from 'motion/react'
 import { CreditCard, Printer, Receipt } from 'lucide-react'
 import { useState } from 'react'
 import { Badge, Card, Empty, Loading, PageHeader, SectionTitle, Sheet, Button, Logo } from '../../components/ui'
@@ -36,12 +36,11 @@ export default function MembershipPage() {
     <div>
       <PageHeader title="Abbonamento" back kicker="Stato e pagamenti" />
       {current ? (
-        <motion.div initial={{ rotateY: -20, opacity: 0 }} animate={{ rotateY: 0, opacity: 1 }} transition={{ type: 'spring', stiffness: 120 }} className="grain relative overflow-hidden rounded-3xl bg-gradient-to-br from-navy-bright via-navy to-ink p-6" style={{ perspective: 800 }}>
-          <div className="stripes absolute inset-0 opacity-30" />
-          <div className="relative flex items-start justify-between">
+        <m.div initial={{ rotateY: -20, opacity: 0 }} animate={{ rotateY: 0, opacity: 1 }} transition={{ type: 'spring', stiffness: 120 }} className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-navy-bright via-navy to-ink p-6" style={{ perspective: 800 }}>
+                    <div className="relative flex items-start justify-between">
             <div>
               <div className="label !text-gold">Membership card</div>
-              <div className="mt-1 font-display text-4xl uppercase leading-none">{current.plan_name}</div>
+              <div className="mt-1 text-2xl font-semibold leading-none">{current.plan_name}</div>
             </div>
             <Logo size={56} />
           </div>
@@ -68,7 +67,7 @@ export default function MembershipPage() {
               Sospeso dal {fmtDate(current.suspended_from)} al {fmtDate(current.suspended_to)}: la scadenza è stata posticipata.
             </p>
           )}
-        </motion.div>
+        </m.div>
       ) : (
         <Empty icon={<CreditCard className="size-7" />} title="Nessun abbonamento" text="Passa in reception per scegliere il piano più adatto a te." />
       )}

@@ -1,4 +1,4 @@
-import { motion } from 'motion/react'
+import { m } from 'motion/react'
 import { BarChart3, ChevronRight, ClipboardList, Download, History, Megaphone, MessageCircle, Package, Phone, Plus, ScanLine, Settings, ShoppingBag, Tablet, Tag, Trash2, UserPlus, Users } from 'lucide-react'
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -35,7 +35,7 @@ export function More() {
       <PageHeader title="Altro" kicker="Strumenti di gestione" />
       <div className="grid gap-2 sm:grid-cols-2">
         {items.map((it, i) => (
-          <motion.div key={it.to} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0, transition: { delay: i * 0.03 } }}>
+          <m.div key={it.to} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0, transition: { delay: i * 0.03 } }}>
             <Link to={it.to} className="card flex items-center gap-3 p-4 transition hover:border-gold/40">
               <span className="grid size-11 place-items-center rounded-xl bg-gold/15 text-gold">
                 <it.icon className="size-5" />
@@ -43,7 +43,7 @@ export function More() {
               <span className="flex-1 font-semibold">{it.label}</span>
               <ChevronRight className="size-4 text-muted" />
             </Link>
-          </motion.div>
+          </m.div>
         ))}
       </div>
     </div>
@@ -236,7 +236,7 @@ export function StatsPage() {
                       <span className="text-muted">{c.n}</span>
                     </div>
                     <div className="mt-1 h-2 overflow-hidden rounded-full bg-white/10">
-                      <motion.div className="h-full rounded-full bg-gold" initial={{ width: 0 }} animate={{ width: `${(c.n / max) * 100}%` }} />
+                      <m.div className="h-full rounded-full bg-gold" initial={{ width: 0 }} animate={{ width: `${(c.n / max) * 100}%` }} />
                     </div>
                   </div>
                 )
@@ -248,7 +248,7 @@ export function StatsPage() {
       <SectionTitle>Clienti a rischio abbandono</SectionTitle>
       <p className="-mt-2 mb-3 text-xs text-muted">Abbonamento attivo ma nessun ingresso recente. Una telefonata può fare la differenza.</p>
       <div className="space-y-2">
-        {s.at_risk_clients.length === 0 && <p className="card p-4 text-sm text-muted">Nessuno: ottimo lavoro! 💪</p>}
+        {s.at_risk_clients.length === 0 && <p className="card p-4 text-sm text-muted">Nessuno: ottimo lavoro!</p>}
         {s.at_risk_clients.map((c) => (
           <div key={c.id} className="card flex items-center gap-3 p-3">
             <Link to={`/staff/clienti/${c.id}`} className="flex-1">

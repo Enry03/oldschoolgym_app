@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from 'motion/react'
+import { AnimatePresence, m } from 'motion/react'
 import { Camera, CameraOff, CheckCircle2, Search, XCircle } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
@@ -111,20 +111,20 @@ export default function Checkin() {
         {on && (
           <>
             <div className="pointer-events-none absolute inset-10 rounded-3xl border-2 border-gold/80" />
-            <motion.div className="pointer-events-none absolute inset-x-10 h-0.5 bg-gold shadow-[0_0_16px_#F5C518]" animate={{ top: ['12%', '86%', '12%'] }} transition={{ repeat: Infinity, duration: 2.4, ease: 'easeInOut' }} />
+            <m.div className="pointer-events-none absolute inset-x-10 h-0.5 bg-gold shadow-[0_0_16px_#F5C518]" animate={{ top: ['12%', '86%', '12%'] }} transition={{ repeat: Infinity, duration: 2.4, ease: 'easeInOut' }} />
           </>
         )}
         <AnimatePresence>
           {result && (
-            <motion.div initial={{ opacity: 0, scale: 1.1 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className={`absolute inset-0 grid place-items-center p-6 text-center ${result.allowed ? 'bg-success/95 text-ink' : 'bg-danger/95 text-white'}`}>
+            <m.div initial={{ opacity: 0, scale: 1.1 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className={`absolute inset-0 grid place-items-center p-6 text-center ${result.allowed ? 'bg-success/95 text-ink' : 'bg-danger/95 text-white'}`}>
               <div>
-                <motion.div initial={{ scale: 0, rotate: -90 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: 'spring', stiffness: 260, damping: 14 }}>
+                <m.div initial={{ scale: 0, rotate: -90 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: 'spring', stiffness: 260, damping: 14 }}>
                   {result.allowed ? <CheckCircle2 className="mx-auto size-20" /> : <XCircle className="mx-auto size-20" />}
-                </motion.div>
+                </m.div>
                 {result.found && (
                   <div className="mt-3 flex flex-col items-center">
                     <Avatar p={{ first_name: result.name?.split(' ')[0], last_name: result.name?.split(' ')[1], avatar_url: result.avatar_url }} size={56} />
-                    <div className="mt-2 font-display text-3xl uppercase leading-none">{result.name}</div>
+                    <div className="mt-2 text-2xl font-semibold leading-none">{result.name}</div>
                   </div>
                 )}
                 <div className="mt-2 text-lg font-bold">{result.allowed ? (result.duplicate ? 'Già entrato' : 'Benvenuto!') : result.reason}</div>
@@ -136,7 +136,7 @@ export default function Checkin() {
                   </div>
                 )}
               </div>
-            </motion.div>
+            </m.div>
           )}
         </AnimatePresence>
       </div>

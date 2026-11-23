@@ -1,6 +1,6 @@
 import { addDays, format, isSameDay, startOfDay } from 'date-fns'
 import { it } from 'date-fns/locale'
-import { AnimatePresence, motion } from 'motion/react'
+import { AnimatePresence, m } from 'motion/react'
 import { CalendarX2, Clock, MapPin, User, Users } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
@@ -48,7 +48,7 @@ export default function ClientCalendar() {
     const { data: st, error } = await supabase.rpc('book_session', { p_session: s.id })
     setBusy(false)
     if (error) return toast.error(errMsg(error))
-    toast.success(st === 'booked' ? 'Posto prenotato! 💪' : "Sei in lista d'attesa: ti avvisiamo se si libera un posto")
+    toast.success(st === 'booked' ? 'Posto prenotato!' : "Sei in lista d'attesa: ti avvisiamo se si libera un posto")
     setSel(null)
     reload()
   }
@@ -74,7 +74,7 @@ export default function ClientCalendar() {
             const has = (data ?? []).some((s) => isSameDay(new Date(s.starts_at), d))
             return (
               <button key={d.toISOString()} onClick={() => setDay(d)} className={`relative flex w-14 shrink-0 flex-col items-center rounded-2xl py-2.5 transition ${active ? 'text-ink' : 'bg-surface/60 text-cream'}`}>
-                {active && <motion.span layoutId="day-pill" className="absolute inset-0 rounded-2xl bg-gold" transition={{ type: 'spring', stiffness: 500, damping: 36 }} />}
+                {active && <m.span layoutId="day-pill" className="absolute inset-0 rounded-2xl bg-gold" transition={{ type: 'spring', stiffness: 500, damping: 36 }} />}
                 <span className="relative text-[10px] font-bold uppercase opacity-70">{format(d, 'EEE', { locale: it })}</span>
                 <span className="relative font-display text-2xl leading-tight">{format(d, 'd')}</span>
                 <span className={`relative size-1.5 rounded-full ${has ? (active ? 'bg-ink' : 'bg-gold') : 'bg-transparent'}`} />
@@ -113,7 +113,7 @@ export default function ClientCalendar() {
               const full = s.booked_count >= s.capacity
               const pct = Math.min(1, s.booked_count / Math.max(1, s.capacity))
               return (
-                <motion.button
+                <m.button
                   layout
                   key={s.id}
                   initial={{ opacity: 0, y: 14 }}
@@ -137,7 +137,7 @@ export default function ClientCalendar() {
                     <div className="mt-0.5 truncate text-xs text-muted">{s.trainer_name ?? 'Staff'} · {s.room}</div>
                     <div className="mt-2.5 flex items-center gap-2">
                       <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10">
-                        <motion.div className={`h-full rounded-full ${full ? 'bg-danger' : 'bg-gold'}`} initial={{ width: 0 }} animate={{ width: `${pct * 100}%` }} transition={{ duration: 0.8, delay: 0.1 + i * 0.04 }} />
+                        <m.div className={`h-full rounded-full ${full ? 'bg-danger' : 'bg-gold'}`} initial={{ width: 0 }} animate={{ width: `${pct * 100}%` }} transition={{ duration: 0.8, delay: 0.1 + i * 0.04 }} />
                       </div>
                       <span className="text-[11px] tabular-nums text-muted">
                         {s.booked_count}/{s.capacity}
@@ -155,7 +155,7 @@ export default function ClientCalendar() {
                       <Badge tone="blue">{s.capacity - s.booked_count} posti</Badge>
                     )}
                   </div>
-                </motion.button>
+                </m.button>
               )
             })}
           </AnimatePresence>

@@ -1,4 +1,4 @@
-import { motion } from 'motion/react'
+import { m } from 'motion/react'
 import { Eye, EyeOff, Mail } from 'lucide-react'
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link, Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
@@ -11,18 +11,18 @@ import { errMsg, supabase } from '../../lib/supabase'
 
 function AuthShell({ title, subtitle, children }: { title: string; subtitle?: string; children: ReactNode }) {
   return (
-    <div className="grain relative grid min-h-dvh place-items-center overflow-hidden px-5 py-10">
+    <div className="relative grid min-h-dvh place-items-center overflow-hidden px-5 py-10">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(43,91,168,0.5),transparent_60%),radial-gradient(ellipse_at_bottom,rgba(245,197,24,0.15),transparent_60%)]" />
-      <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }} className="relative w-full max-w-sm">
+      <m.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }} className="relative w-full max-w-sm">
         <Link to="/" className="mx-auto mb-6 block w-fit">
-          <motion.div initial={{ scale: 0.7, rotate: -10 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: 'spring', stiffness: 160, damping: 12 }}>
+          <m.div initial={{ scale: 0.7, rotate: -10 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: 'spring', stiffness: 160, damping: 12 }}>
             <Logo size={120} />
-          </motion.div>
+          </m.div>
         </Link>
-        <h1 className="text-center font-display text-4xl uppercase">{title}</h1>
+        <h1 className="text-center text-2xl font-semibold">{title}</h1>
         {subtitle && <p className="mt-1 text-center text-sm text-muted">{subtitle}</p>}
         <div className="mt-7">{children}</div>
-      </motion.div>
+      </m.div>
     </div>
   )
 }
@@ -58,7 +58,7 @@ export function Login() {
     setBusy(false)
     setCaptchaReset((n) => n + 1)
     if (error) return toast.error(errMsg(error))
-    toast.success('Bentornato! 💪')
+    toast.success('Bentornato!')
     nav(loc.state?.from ?? '/app', { replace: true })
   }
 

@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { AnimatePresence, motion } from 'motion/react'
+import { m } from 'motion/react'
 import { CalendarDays, Clock3, FileCheck2, RefreshCw, ShieldX, Dumbbell, Home, LayoutDashboard, LogOut, Menu, ScanLine, User, Users } from 'lucide-react'
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link, NavLink, Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
@@ -12,18 +12,25 @@ import { fullName, roleLabel } from '../lib/format'
 export function PageTransition({ children }: { children: ReactNode }) {
   const loc = useLocation()
   return (
-    <AnimatePresence mode="wait" initial={false}>
-      <motion.div
-        key={loc.pathname}
-        initial={{ opacity: 0, y: 14 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -8 }}
-        transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-      >
-        {children}
-      </motion.div>
-    </AnimatePresence>
+    // niente attesa dell'uscita: la pagina nuova compare subito con una dissolvenza breve
+    <m.div key={loc.pathname} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}>
+      {children}
+    </m.div>
   )
+}
+
+// Scarica in anticipo le pagine principali quando il telefono è libero,
+// così aprendo una scheda non si aspetta il download
+function usePrefetch(loaders: (() => Promise<unknown>)[]) {
+  useEffect(() => {
+    const run = () => loaders.forEach((l) => void l().catch(() => {}))
+    const ric = (window as Window & { requestIdleCallback?: (cb: () => void) => number }).requestIdleCallback
+    const id = ric ? ric(run) : window.setTimeout(run, 1500)
+    return () => {
+      if (!ric) window.clearTimeout(id)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 }
 
 interface NavItem {
@@ -41,22 +48,22 @@ function BottomNav({ items, center }: { items: NavItem[]; center: { to: string; 
     <NavLink to={it.to} end={it.end} className="relative flex flex-1 flex-col items-center gap-1 py-2">
       {({ isActive }) => (
         <>
-          {isActive && <motion.span layoutId="nav-pill" className="absolute top-0 h-1 w-8 rounded-full bg-gold" transition={{ type: 'spring', stiffness: 500, damping: 35 }} />}
-          <it.icon className={clsx('size-[22px] transition-colors', isActive ? 'text-gold' : 'text-muted')} strokeWidth={isActive ? 2.4 : 2} />
-          <span className={clsx('text-[10.5px] font-semibold transition-colors', isActive ? 'text-cream' : 'text-muted')}>{it.label}</span>
+          {isActive && <m.span layoutId="nav-pill" className="absolute top-0 h-1 w-8 rounded-full bg-gold" transition={{ type: 'spring', stiffness: 500, damping: 35 }} />}
+          <it.icon className={clsx('size-[22px] transition-colors', isActive ? 'text-gold' : 'text-muted')} strokeWidth={2} />
+          <span className={clsx('text-[11px] font-medium transition-colors', isActive ? 'text-cream' : 'text-muted')}>{it.label}</span>
         </>
       )}
     </NavLink>
   )
   return (
-    <nav className="safe-bottom fixed inset-x-0 bottom-0 z-40 border-t border-line/50 bg-ink/85 backdrop-blur-xl md:hidden">
+    <nav className="safe-bottom fixed inset-x-0 bottom-0 z-40 border-t border-line/50 bg-ink md:hidden">
       <div className="mx-auto flex max-w-lg items-end px-2">
         {left.map((it) => (
           <Item key={it.to} it={it} />
         ))}
         <div className="flex flex-1 justify-center">
-          <NavLink to={center.to} aria-label={center.label} className="-mt-7 grid size-16 place-items-center rounded-full bg-gold text-ink shadow-[0_10px_30px_-6px_rgba(245,197,24,0.7)] ring-4 ring-ink transition active:scale-95">
-            <C className="size-7" strokeWidth={2.3} />
+          <NavLink to={center.to} aria-label={center.label} className="-mt-5 grid size-14 place-items-center rounded-full bg-gold text-ink ring-4 ring-ink transition-transform active:scale-95">
+            <C className="size-6" strokeWidth={2.2} />
           </NavLink>
         </div>
         {right.map((it) => (
@@ -82,7 +89,7 @@ function SideNav({ items, extra }: { items: NavItem[]; extra?: NavItem[] }) {
       </div>
       <nav className="flex-1 space-y-1 overflow-y-auto">
         {all.map((it) => (
-          <NavLink key={it.to} to={it.to} end={it.end} className={({ isActive }) => clsx('flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition', isActive ? 'bg-gold text-ink' : 'text-cream/80 hover:bg-white/5')}>
+          <NavLink key={it.to} to={it.to} end={it.end} className={({ isActive }) => clsx('flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors', isActive ? 'bg-white/8 text-gold' : 'text-cream/75 hover:bg-white/5')}>
             <it.icon className="size-[18px]" />
             {it.label}
           </NavLink>
@@ -123,7 +130,7 @@ export function RequireAuth({ staff }: { staff?: boolean }) {
       <div className="grid min-h-dvh place-items-center p-8 text-center">
         <div>
           <Logo size={90} className="mx-auto mb-6" />
-          <h1 className="font-display text-3xl uppercase">Account sospeso</h1>
+          <h1 className="text-2xl font-semibold">Account sospeso</h1>
           <p className="mt-2 text-muted">Contatta la reception per riattivarlo.</p>
         </div>
       </div>
@@ -150,15 +157,15 @@ function AcceptRules() {
     setBusy(false)
     if (error) return toast.error(errMsg(error))
     await refreshProfile()
-    toast.success('Grazie, buon allenamento! 💪')
+    toast.success('Grazie, buon allenamento!')
   }
   return (
     <div className="grid min-h-dvh place-items-center p-6">
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md">
+      <m.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md">
         <div className="mx-auto mb-4 grid size-14 place-items-center rounded-full bg-gold/15 text-gold">
           <FileCheck2 className="size-7" />
         </div>
-        <h1 className="text-center font-display text-3xl uppercase">{updated ? 'Regolamento aggiornato' : 'Regolamento della palestra'}</h1>
+        <h1 className="text-center text-2xl font-semibold">{updated ? 'Regolamento aggiornato' : 'Regolamento della palestra'}</h1>
         <p className="mt-2 text-center text-sm text-muted">{updated ? 'Abbiamo aggiornato le regole: leggile e accettale per continuare.' : 'Prima di iniziare leggi e accetta le regole della palestra.'}</p>
         <div className="card mt-5 max-h-[45dvh] space-y-2 overflow-y-auto p-4 text-sm leading-relaxed text-cream/85">
           {(settings?.rules_text ?? '').split(/\n+/).map((r, i) => (
@@ -205,7 +212,7 @@ function AcceptRules() {
         >
           Esci
         </button>
-      </motion.div>
+      </m.div>
     </div>
   )
 }
@@ -229,12 +236,12 @@ function PendingApproval() {
   const Icon = rejected ? ShieldX : Clock3
   return (
     <div className="grid min-h-dvh place-items-center p-8 text-center">
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="max-w-sm">
+      <m.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="max-w-sm">
         <Logo size={90} className="mx-auto mb-6" />
         <div className={clsx('mx-auto mb-4 grid size-14 place-items-center rounded-full', rejected ? 'bg-danger/15 text-danger' : 'bg-gold/15 text-gold')}>
           <Icon className="size-7" />
         </div>
-        <h1 className="font-display text-3xl uppercase">{rejected ? 'Iscrizione non approvata' : 'Iscrizione in attesa'}</h1>
+        <h1 className="text-2xl font-semibold">{rejected ? 'Iscrizione non approvata' : 'Iscrizione in attesa'}</h1>
         {rejected ? (
           <>
             <p className="mt-2 text-muted">La palestra non ha approvato questa iscrizione.</p>
@@ -268,7 +275,7 @@ function PendingApproval() {
             Esci
           </button>
         </div>
-      </motion.div>
+      </m.div>
     </div>
   )
 }
@@ -282,9 +289,9 @@ const clientItems: NavItem[] = [
 
 export function ClientLayout() {
   const { isStaff } = useAuth()
+  usePrefetch([() => import('../pages/client/Home'), () => import('../pages/client/Calendar'), () => import('../pages/client/Training'), () => import('../pages/client/Enter'), () => import('../pages/client/Profile')])
   return (
     <div className="relative mx-auto min-h-dvh max-w-lg">
-      <div className="pointer-events-none fixed inset-x-0 top-0 z-0 h-72 bg-[radial-gradient(ellipse_at_top,rgba(43,91,168,0.35),transparent_70%)]" />
       <main className="safe-top relative z-10 px-4 pb-32 pt-4">
         {isStaff && (
           <NavLink to="/staff" className="mb-3 flex items-center justify-center gap-2 rounded-xl bg-gold/10 py-2 text-xs font-semibold text-gold">
@@ -309,6 +316,7 @@ const staffItems: NavItem[] = [
 
 export function StaffLayout() {
   const { isFront } = useAuth()
+  usePrefetch([() => import('../pages/staff/Dashboard'), () => import('../pages/staff/Clients'), () => import('../pages/staff/StaffCalendar'), () => import('../pages/staff/Checkin'), () => import('../pages/staff/Admin')])
   const extra: NavItem[] = [
     { to: '/staff/checkin', label: 'Check-in QR', icon: ScanLine },
     { to: '/staff/schede', label: 'Schede ed esercizi', icon: Dumbbell },
@@ -318,7 +326,6 @@ export function StaffLayout() {
     <div className="flex min-h-dvh">
       <SideNav items={staffItems} extra={extra} />
       <div className="relative min-w-0 flex-1">
-        <div className="pointer-events-none fixed inset-x-0 top-0 z-0 h-72 bg-[radial-gradient(ellipse_at_top,rgba(245,197,24,0.10),transparent_70%)]" />
         <main className="safe-top relative z-10 mx-auto max-w-5xl px-4 pb-32 pt-4 md:px-8 md:pb-12 md:pt-8">
           <PageTransition>
             <Outlet />

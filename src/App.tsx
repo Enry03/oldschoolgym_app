@@ -1,3 +1,4 @@
+import { LazyMotion } from 'motion/react'
 import { lazy, Suspense } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { Toaster } from 'sonner'
@@ -41,9 +42,12 @@ const ExportPage = admin('ExportPage')
 const SettingsPage = admin('SettingsPage')
 const AuditPage = admin('AuditPage')
 
+const loadMotion = () => import('./lib/motion-features').then((r) => r.default)
+
 export default function App() {
   return (
     <AuthProvider>
+      <LazyMotion features={loadMotion}>
       <BrowserRouter>
         <Suspense fallback={<Spinner />}>
           <Routes>
@@ -107,6 +111,7 @@ export default function App() {
           }}
         />
       </BrowserRouter>
+      </LazyMotion>
     </AuthProvider>
   )
 }

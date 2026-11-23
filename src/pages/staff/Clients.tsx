@@ -1,4 +1,4 @@
-import { motion } from 'motion/react'
+import { m } from 'motion/react'
 import { Download, FileCheck2, Mail, MessageCircle, Phone, Plus, Search, UserPlus } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
@@ -133,7 +133,7 @@ export default function Clients() {
             const left = daysUntil(c.membership?.end_date)
             const certLeft = daysUntil(c.cert?.expires_on)
             return (
-              <motion.div key={c.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0, transition: { delay: Math.min(i, 12) * 0.025 } }}>
+              <m.div key={c.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0, transition: { delay: Math.min(i, 12) * 0.025 } }}>
                 <Link to={`/staff/clienti/${c.id}`} className="card flex items-center gap-3 p-3 transition hover:border-gold/40">
                   <Avatar p={c} size={46} />
                   <div className="min-w-0 flex-1">
@@ -152,7 +152,7 @@ export default function Clients() {
                     )}
                   </div>
                 </Link>
-              </motion.div>
+              </m.div>
             )
           })
         )}

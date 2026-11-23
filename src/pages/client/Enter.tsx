@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from 'motion/react'
+import { AnimatePresence, m } from 'motion/react'
 import { Camera, CheckCircle2, QrCode, ScanLine, XCircle } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -86,7 +86,7 @@ export default function Enter() {
   return (
     <div className="flex min-h-[78dvh] flex-col items-center text-center">
       <div className="label mt-2 text-gold">Check-in</div>
-      <h1 className="font-display text-[34px] uppercase leading-none">Entra in palestra</h1>
+      <h1 className="text-2xl font-semibold leading-none">Entra in palestra</h1>
       <p className="mt-2 max-w-xs text-sm text-muted">Inquadra il QR sul tablet all'ingresso. Cambia ogni 30 secondi, quindi serve essere lì.</p>
 
       <div className="relative mt-6 aspect-square w-full max-w-sm overflow-hidden rounded-3xl bg-night">
@@ -94,9 +94,9 @@ export default function Enter() {
         {!on && !result && (
           <button onClick={start} className="grid size-full place-items-center">
             <div>
-              <motion.div animate={{ scale: [1, 1.06, 1] }} transition={{ repeat: Infinity, duration: 2.2 }} className="mx-auto grid size-24 place-items-center rounded-full bg-gold text-ink shadow-[0_10px_40px_-8px_rgba(245,197,24,0.8)]">
+              <div className="mx-auto grid size-24 place-items-center rounded-full bg-gold text-ink">
                 <ScanLine className="size-11" />
-              </motion.div>
+              </div>
               <p className="mt-4 font-semibold">Tocca per aprire la fotocamera</p>
             </div>
           </button>
@@ -104,20 +104,20 @@ export default function Enter() {
         {on && (
           <>
             <div className="pointer-events-none absolute inset-10 rounded-3xl border-2 border-gold/80" />
-            <motion.div className="pointer-events-none absolute inset-x-10 h-0.5 bg-gold shadow-[0_0_16px_#F5C518]" animate={{ top: ['12%', '86%', '12%'] }} transition={{ repeat: Infinity, duration: 2.4, ease: 'easeInOut' }} />
+            <m.div className="pointer-events-none absolute inset-x-10 h-0.5 bg-gold shadow-[0_0_16px_#F5C518]" animate={{ top: ['12%', '86%', '12%'] }} transition={{ repeat: Infinity, duration: 2.4, ease: 'easeInOut' }} />
           </>
         )}
         <AnimatePresence>
           {result && (
-            <motion.div initial={{ opacity: 0, scale: 1.08 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className={`absolute inset-0 grid place-items-center p-6 ${result.allowed ? 'bg-success text-ink' : 'bg-danger text-white'}`}>
+            <m.div initial={{ opacity: 0, scale: 1.08 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className={`absolute inset-0 grid place-items-center p-6 ${result.allowed ? 'bg-success text-ink' : 'bg-danger text-white'}`}>
               <div className="flex flex-col items-center">
-                <motion.div initial={{ scale: 0, rotate: -90 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: 'spring', stiffness: 260, damping: 14 }}>
+                <m.div initial={{ scale: 0, rotate: -90 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: 'spring', stiffness: 260, damping: 14 }}>
                   {result.allowed ? <CheckCircle2 className="size-20" /> : <XCircle className="size-20" />}
-                </motion.div>
+                </m.div>
                 {result.name && (
                   <div className="mt-3 flex items-center gap-2">
                     <Avatar p={profile} size={40} />
-                    <span className="font-display text-2xl uppercase leading-none">{result.name}</span>
+                    <span className="text-xl font-semibold leading-none">{result.name}</span>
                   </div>
                 )}
                 <div className="mt-3 text-lg font-bold">
@@ -133,7 +133,7 @@ export default function Enter() {
                   </div>
                 )}
               </div>
-            </motion.div>
+            </m.div>
           )}
         </AnimatePresence>
       </div>

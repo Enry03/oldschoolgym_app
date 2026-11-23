@@ -1,7 +1,6 @@
 import { PushBanner } from '../../components/PushCard'
 import PendingSignups from '../../components/PendingSignups'
-import { motion } from 'motion/react'
-import { AlertTriangle, Bell, CalendarClock, FileWarning, ScanLine, UserPlus, Users, Wallet } from 'lucide-react'
+import { AlertTriangle, Bell, CalendarClock, ChevronRight, FileWarning, ScanLine, UserPlus, Users, Wallet } from 'lucide-react'
 import { lazy, Suspense } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Avatar, Badge, Card, IconButton, SectionTitle, Skeleton, Stat } from '../../components/ui'
@@ -44,10 +43,10 @@ export default function StaffDashboard() {
   return (
     <div>
       <PushBanner />
-      <div className="mb-6 flex items-center gap-3">
+      <div className="mb-5 flex items-center gap-3">
         <div className="min-w-0 flex-1">
-          <div className="text-sm text-muted">{greeting()},</div>
-          <h1 className="truncate font-display text-4xl uppercase leading-none">{profile?.first_name}</h1>
+          <div className="text-xs text-muted">{greeting()}</div>
+          <h1 className="truncate text-lg font-semibold leading-tight">{profile?.first_name}</h1>
         </div>
         <IconButton aria-label="Notifiche" badge={unread} onClick={() => nav('/app/notifiche')}>
           <Bell className="size-5" />
@@ -69,48 +68,53 @@ export default function StaffDashboard() {
         <>
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
             <Stat tone="gold" label="In sala ora" value={d.in_gym_now} sub={`${d.checkins_today} ingressi oggi`} icon={<ScanLine className="size-4" />} onClick={() => nav('/staff/checkin')} />
-            <Stat tone="navy" label="Iscritti attivi" value={d.active_members} sub={`su ${d.total_clients} clienti`} icon={<Users className="size-4" />} onClick={() => nav('/staff/clienti')} />
+            <Stat label="Iscritti attivi" value={d.active_members} sub={`su ${d.total_clients} clienti`} icon={<Users className="size-4" />} onClick={() => nav('/staff/clienti')} />
             {isFront ? (
               <Stat label="Incassi mese" value={euro(d.revenue_month_cents ?? 0)} sub={d.pending_payments_cents ? `${euro(d.pending_payments_cents)} da incassare` : 'Nessun sospeso'} icon={<Wallet className="size-4" />} onClick={() => nav('/staff/statistiche')} />
             ) : (
               <Stat label="Lezioni oggi" value={d.today_sessions.length} icon={<CalendarClock className="size-4" />} />
             )}
-            <Stat tone="cream" label="Nuovi lead" value={d.new_leads} sub="Richieste di prova" icon={<UserPlus className="size-4" />} onClick={() => nav('/staff/lead')} />
+            <Stat label="Richieste di prova" value={d.new_leads} sub="Dal sito" icon={<UserPlus className="size-4" />} onClick={() => nav('/staff/lead')} />
           </div>
 
-          {/* Alert */}
-          <div className="mt-4 grid gap-2 sm:grid-cols-3">
-            {[
-              { n: d.expiring_7d, t: 'abbonamenti scadono entro 7 giorni', icon: CalendarClock, to: '/staff/clienti?filtro=scadenza', tone: 'text-gold bg-gold/10 border-gold/30' },
-              { n: d.certs_expiring_30d, t: 'certificati in scadenza (30 gg)', icon: FileWarning, to: '/staff/clienti?filtro=certificato', tone: 'text-info bg-info/10 border-info/30' },
-              { n: d.at_risk, t: 'clienti a rischio abbandono', icon: AlertTriangle, to: '/staff/statistiche', tone: 'text-danger bg-danger/10 border-danger/30' },
-            ].map((a, i) => (
-              <motion.div key={a.t} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0, transition: { delay: 0.1 + i * 0.05 } }}>
-                <Link to={a.to} className={`flex items-center gap-3 rounded-2xl border p-3 ${a.tone}`}>
-                  <a.icon className="size-5 shrink-0" />
-                  <span className="font-display text-2xl leading-none">{a.n}</span>
-                  <span className="text-xs text-cream/80">{a.t}</span>
-                </Link>
-              </motion.div>
-            ))}
-          </div>
+          {/* Da controllare: solo le voci che hanno qualcosa */}
+          {(() => {
+            const alerts = [
+              { n: d.expiring_7d, t: 'abbonamenti scadono entro 7 giorni', icon: CalendarClock, to: '/staff/clienti?filtro=scadenza' },
+              { n: d.certs_expiring_30d, t: 'certificati scadono entro 30 giorni', icon: FileWarning, to: '/staff/clienti?filtro=certificato' },
+              { n: d.at_risk, t: 'clienti non vengono da un po\'', icon: AlertTriangle, to: '/staff/statistiche' },
+            ].filter((a) => a.n > 0)
+            if (alerts.length === 0) return null
+            return (
+              <div className="card mt-3 divide-y divide-line/50 p-0">
+                {alerts.map((a) => (
+                  <Link key={a.t} to={a.to} className="flex items-center gap-3 p-3">
+                    <a.icon className="size-[18px] shrink-0 text-gold" strokeWidth={1.75} />
+                    <span className="w-6 text-right font-semibold tabular-nums">{a.n}</span>
+                    <span className="flex-1 text-sm text-cream/80">{a.t}</span>
+                    <ChevronRight className="size-4 text-muted" />
+                  </Link>
+                ))}
+              </div>
+            )
+          })()}
 
           <div className="mt-2 grid gap-4 md:grid-cols-2">
             <div>
               <SectionTitle action={<Link to="/staff/calendario" className="text-xs font-semibold text-gold">Gestisci</Link>}>Lezioni di oggi</SectionTitle>
               {d.today_sessions.length === 0 ? (
-                <p className="card p-4 text-sm text-muted">Nessuna lezione oggi.</p>
+                <p className="card p-4 text-sm text-muted">Nessuna lezione oggi</p>
               ) : (
-                <div className="space-y-2">
+                <div className="card divide-y divide-line/50 p-0">
                   {d.today_sessions.map((s) => {
                     const pct = s.booked / Math.max(1, s.capacity)
                     return (
-                      <Link key={s.id} to={`/staff/calendario?sessione=${s.id}`} className="card flex items-center gap-3 p-3">
-                        <div className="w-12 font-display text-xl">{fmtTime(s.starts_at)}</div>
+                      <Link key={s.id} to={`/staff/calendario?sessione=${s.id}`} className="flex items-center gap-3 p-3">
+                        <div className="w-12 font-semibold tabular-nums">{fmtTime(s.starts_at)}</div>
                         <div className="min-w-0 flex-1">
                           <div className="truncate text-sm font-semibold">{s.title}</div>
                           <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-white/10">
-                            <motion.div className={`h-full ${pct >= 1 ? 'bg-danger' : 'bg-gold'}`} initial={{ width: 0 }} animate={{ width: `${Math.min(100, pct * 100)}%` }} />
+                            <div className={`h-full ${pct >= 1 ? 'bg-danger' : 'bg-gold'}`} style={{ width: `${Math.min(100, pct * 100)}%` }} />
                           </div>
                         </div>
                         <Badge tone={pct >= 1 ? 'red' : 'gray'}>
@@ -135,11 +139,11 @@ export default function StaffDashboard() {
       )}
 
       <SectionTitle action={<Link to="/staff/checkin" className="text-xs font-semibold text-gold">Scanner</Link>}>Ultimi ingressi</SectionTitle>
-      <div className="space-y-2">
-        {(recent ?? []).length === 0 && <p className="card p-4 text-sm text-muted">Ancora nessun ingresso registrato.</p>}
+      <div className="card divide-y divide-line/50 p-0">
+        {(recent ?? []).length === 0 && <p className="p-4 text-sm text-muted">Ancora nessun ingresso registrato</p>}
         {(recent ?? []).map((c) => (
-          <div key={c.id} className="card flex items-center gap-3 p-3">
-            <Avatar p={c.profiles} size={38} />
+          <div key={c.id} className="flex items-center gap-3 p-3">
+            <Avatar p={c.profiles} size={32} />
             <div className="flex-1">
               <div className="text-sm font-semibold">
                 {c.profiles?.first_name} {c.profiles?.last_name}
