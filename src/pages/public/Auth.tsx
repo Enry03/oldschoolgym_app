@@ -12,12 +12,9 @@ import { errMsg, supabase } from '../../lib/supabase'
 function AuthShell({ title, subtitle, children }: { title: string; subtitle?: string; children: ReactNode }) {
   return (
     <div className="relative grid min-h-dvh place-items-center overflow-hidden px-5 py-10">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(43,91,168,0.5),transparent_60%),radial-gradient(ellipse_at_bottom,rgba(245,197,24,0.15),transparent_60%)]" />
-      <m.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }} className="relative w-full max-w-sm">
+      <m.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }} className="relative w-full max-w-sm">
         <Link to="/" className="mx-auto mb-6 block w-fit">
-          <m.div initial={{ scale: 0.7, rotate: -10 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: 'spring', stiffness: 160, damping: 12 }}>
-            <Logo size={120} />
-          </m.div>
+          <Logo size={96} />
         </Link>
         <h1 className="text-center text-2xl font-semibold">{title}</h1>
         {subtitle && <p className="mt-1 text-center text-sm text-muted">{subtitle}</p>}

@@ -98,19 +98,19 @@ export default function Landing() {
       </header>
 
       {/* APERTURA */}
-      <section className="relative flex min-h-[88svh] flex-col items-center justify-center px-4 pt-14 text-center">
+      <section className="relative flex min-h-[100svh] flex-col items-center justify-center px-4 pb-6 pt-12 text-center">
         <m.div
           initial={{ opacity: 0, scale: 1.25, rotate: -6 }}
           animate={{ opacity: 1, scale: 1, rotate: 0 }}
           transition={{ duration: 0.5, ease }}
         >
-          <Logo size={260} className="max-w-[64vw]" />
+          <Logo size={210} className="max-w-[54vw]" />
         </m.div>
         <m.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.45, duration: 0.4 }}>
-          <Stars className="mt-6" />
+          <Stars className="mt-5" />
         </m.div>
         <m.h1
-          className="mt-5 font-varsity text-[34px] leading-[1.05] text-cream sm:text-5xl"
+          className="mt-4 font-varsity text-[32px] leading-[1.05] text-cream sm:text-5xl"
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.55, duration: 0.5, ease }}
@@ -128,7 +128,7 @@ export default function Landing() {
           Pochi alla volta, seguiti uno per uno. Ferro, guantoni e niente scorciatoie.
         </m.p>
         <m.div
-          className="mt-7 flex w-full max-w-xs flex-col gap-3"
+          className="mt-6 flex w-full max-w-xs flex-col gap-2"
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.85, duration: 0.5, ease }}
