@@ -4,7 +4,7 @@ import { Bell, Camera, ChevronRight, CreditCard, Download, FileHeart, Gift, KeyR
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { Avatar, Badge, Button, Field, Input, PageHeader, SectionTitle, Select, Sheet, Toggle } from '../../components/ui'
+import { Avatar, Button, Field, Input, PageHeader, SectionTitle, Select, Sheet, Toggle } from '../../components/ui'
 import { useAuth } from '../../context/AuthContext'
 import { daysUntil, downloadBlob, fmtDate, fullName, isoDate, roleLabel } from '../../lib/format'
 import { useAsync } from '../../lib/hooks'
@@ -72,18 +72,16 @@ export default function Profile() {
       <PageHeader title="Profilo" />
       <m.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="card flex items-center gap-4 p-5">
         <label className="relative cursor-pointer">
-          <Avatar p={profile} size={76} ring />
+          <Avatar p={profile} size={64} />
           <span className="absolute -bottom-1 -right-1 grid size-8 place-items-center rounded-full bg-gold text-ink ring-4 ring-surface">
-            {uploading ? <Upload className="size-4 animate-bounce" /> : <Camera className="size-4" />}
+            {uploading ? <Upload className="size-4 animate-pulse" /> : <Camera className="size-4" />}
           </span>
           <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(e) => e.target.files?.[0] && uploadAvatar(e.target.files[0])} />
         </label>
         <div className="min-w-0 flex-1">
           <div className="truncate text-xl font-semibold leading-none">{fullName(profile)}</div>
           <div className="mt-1 truncate text-sm text-muted">{profile?.email}</div>
-          <Badge tone="gold" className="mt-2">
-            {roleLabel[profile?.role ?? 'client']}
-          </Badge>
+          <div className="mt-1 text-xs text-gold">{roleLabel[profile?.role ?? 'client']}</div>
         </div>
       </m.div>
       <Button variant="ghost" block className="mt-3" onClick={() => setEdit(true)}>

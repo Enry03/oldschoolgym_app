@@ -78,12 +78,12 @@ function PlanTab() {
           ))}
         </Select>
       )}
-      <m.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="relative overflow-hidden rounded-3xl bg-navy-bright p-5">
+      <m.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="relative overflow-hidden rounded-2xl border border-line/50 bg-surface-2 p-4">
                 <div className="relative">
           <Badge tone="gold">{plan?.goal ?? 'Scheda personale'}</Badge>
-          <h2 className="mt-2 text-2xl font-semibold leading-none">{plan?.title}</h2>
-          {plan?.notes && <p className="mt-2 text-sm text-white/80">{plan.notes}</p>}
-          <div className="mt-3 text-xs text-white/70">
+          <h2 className="mt-2 text-xl font-semibold leading-tight">{plan?.title}</h2>
+          {plan?.notes && <p className="mt-2 text-sm text-cream/80">{plan.notes}</p>}
+          <div className="mt-3 text-xs text-muted">
             Dal {fmtDate(plan?.starts_on)} {plan?.ends_on ? `al ${fmtDate(plan.ends_on)}` : ''}
           </div>
         </div>
@@ -91,7 +91,7 @@ function PlanTab() {
 
       <div className="no-scrollbar -mx-4 mt-4 flex gap-2 overflow-x-auto px-4">
         {days.map(([d]) => (
-          <button key={d} onClick={() => setDay(d)} className={`shrink-0 rounded-full px-4 py-2 text-sm font-bold transition ${d === day ? 'bg-gold text-ink' : 'bg-surface text-cream/80'}`}>
+          <button key={d} onClick={() => setDay(d)} className={`shrink-0 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${d === day ? 'bg-gold text-ink' : 'bg-surface text-cream/80'}`}>
             {d}
           </button>
         ))}
@@ -103,8 +103,8 @@ function PlanTab() {
           const lastW = last.find((l) => l.weight_kg != null)?.weight_kg
           const done = doneToday.has(it.id)
           return (
-            <m.button key={it.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0, transition: { delay: i * 0.05 } }} whileTap={{ scale: 0.98 }} onClick={() => setLogItem(it)} className={`card flex w-full items-center gap-4 p-4 text-left ${done ? 'border-success/50' : ''}`}>
-              <div className={`grid size-12 shrink-0 place-items-center rounded-2xl font-display text-xl ${done ? 'bg-success text-ink' : 'bg-gold/15 text-gold'}`}>{done ? <Check className="size-6" /> : i + 1}</div>
+            <m.button key={it.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0, transition: { delay: Math.min(i, 6) * 0.03, duration: 0.2 } }} whileTap={{ scale: 0.98 }} onClick={() => setLogItem(it)} className={`card flex w-full items-center gap-4 p-4 text-left ${done ? 'border-success/50' : ''}`}>
+              <div className={`grid size-9 shrink-0 place-items-center rounded-lg text-sm font-semibold tabular-nums ${done ? 'bg-success text-ink' : 'bg-white/5 text-muted'}`}>{done ? <Check className="size-4" /> : i + 1}</div>
               <div className="min-w-0 flex-1">
                 <div className="font-semibold">{it.exercise_name}</div>
                 <div className="mt-0.5 text-sm text-muted">

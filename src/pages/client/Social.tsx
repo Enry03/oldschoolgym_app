@@ -1,5 +1,5 @@
 import { AnimatePresence, m as M } from 'motion/react'
-import { Bell, CheckCheck, Copy, Gift, MessageCircle, Pin, Send, Share2, UserPlus } from 'lucide-react'
+import { Bell, CheckCheck, Copy, MessageCircle, Pin, Send, Share2 } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -273,15 +273,14 @@ export function InvitePage() {
   return (
     <div>
       <PageHeader title="Porta un amico" back kicker="Allenarsi in due è meglio" />
-      <M.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="relative overflow-hidden rounded-3xl bg-gold p-6 text-ink">
-        <Gift className="size-10" />
-        <div className="mt-3 text-2xl font-semibold leading-none">Il tuo codice</div>
+      <M.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }} className="relative overflow-hidden rounded-2xl bg-gold p-5 text-ink">
+        <div className="text-sm font-medium text-ink/70">Il tuo codice</div>
         <button
           onClick={async () => {
             await navigator.clipboard.writeText(profile?.referral_code ?? '')
             toast.success('Codice copiato')
           }}
-          className="mt-3 flex items-center gap-3 rounded-2xl bg-ink px-5 py-3 font-varsity text-3xl tracking-[0.3em] text-gold"
+          className="mt-2 flex items-center gap-3 rounded-xl bg-ink px-4 py-3 font-mono text-2xl tracking-[0.2em] text-gold"
         >
           {profile?.referral_code} <Copy className="size-5" />
         </button>
@@ -293,8 +292,7 @@ export function InvitePage() {
 
       <div className="card mt-5 p-5">
         <div className="flex items-center gap-2">
-          <UserPlus className="size-5 text-gold" />
-          <h2 className="text-xl font-semibold">Pass ospite</h2>
+          <h2 className="text-lg font-semibold">Pass ospite</h2>
         </div>
         <p className="mt-1 text-sm text-muted">Porta un amico per un allenamento di prova gratuito.</p>
         <form onSubmit={guest} className="mt-4 space-y-3">

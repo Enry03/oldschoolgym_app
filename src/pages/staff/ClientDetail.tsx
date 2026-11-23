@@ -41,7 +41,7 @@ export default function ClientDetail() {
     <div>
       <PageHeader title="" back="/staff/clienti" />
       <m.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="-mt-14 mb-5 flex flex-col items-center text-center">
-        <Avatar p={c} size={92} ring />
+        <Avatar p={c} size={72} />
         <h1 className="mt-3 text-2xl font-semibold leading-none">{fullName(c)}</h1>
         <div className="mt-1 flex items-center gap-2 text-sm text-muted">
           <Badge tone={c.role === 'client' ? 'gray' : 'gold'}>{roleLabel[c.role]}</Badge>
