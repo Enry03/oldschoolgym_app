@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { BarChart3, ChevronRight, ClipboardList, Download, History, Megaphone, MessageCircle, Package, Phone, Plus, ScanLine, Settings, ShoppingBag, Tablet, Tag, Trash2, UserPlus, Users } from 'lucide-react'
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'

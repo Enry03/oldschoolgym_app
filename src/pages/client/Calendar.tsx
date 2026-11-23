@@ -1,6 +1,6 @@
 import { addDays, format, isSameDay, startOfDay } from 'date-fns'
 import { it } from 'date-fns/locale'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'motion/react'
 import { CalendarX2, Clock, MapPin, User, Users } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { toast } from 'sonner'

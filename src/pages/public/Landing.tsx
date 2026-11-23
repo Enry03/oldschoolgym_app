@@ -1,4 +1,4 @@
-import { motion, useScroll, useTransform } from 'framer-motion'
+import { motion, useScroll, useTransform } from 'motion/react'
 import { ArrowRight, CalendarCheck, Clock, Dumbbell, MapPin, MessageCircle, Phone, QrCode, ShieldCheck, Sparkles, Star, TrendingUp, AtSign } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'

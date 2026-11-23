@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'motion/react'
 import { CalendarDays, Clock3, FileCheck2, RefreshCw, ShieldX, Dumbbell, Home, LayoutDashboard, LogOut, Menu, ScanLine, User, Users } from 'lucide-react'
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link, NavLink, Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'

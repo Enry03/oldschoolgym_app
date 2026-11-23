@@ -1,5 +1,5 @@
 import { PushToggle } from '../../components/PushCard'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { Bell, Camera, ChevronRight, CreditCard, Download, FileHeart, Gift, KeyRound, LogOut, MessageCircle, Newspaper, Shield, Trash2, Upload } from 'lucide-react'
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'

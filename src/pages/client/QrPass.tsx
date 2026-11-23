@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { Sun } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 import { Avatar, Badge, Logo } from '../../components/ui'

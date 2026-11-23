@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { CreditCard, Printer, Receipt } from 'lucide-react'
 import { useState } from 'react'
 import { Badge, Card, Empty, Loading, PageHeader, SectionTitle, Sheet, Button, Logo } from '../../components/ui'

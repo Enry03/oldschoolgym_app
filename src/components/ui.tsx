@@ -1,4 +1,4 @@
-import { AnimatePresence, motion, type HTMLMotionProps } from 'framer-motion'
+import { AnimatePresence, motion, type HTMLMotionProps } from 'motion/react'
 import clsx from 'clsx'
 import { Camera, ChevronLeft, Loader2, X } from 'lucide-react'
 import { forwardRef, useEffect, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react'

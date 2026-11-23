@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'motion/react'
 import { AlertTriangle, Camera, Check, Mail, Phone, UserCheck, X } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { toast } from 'sonner'

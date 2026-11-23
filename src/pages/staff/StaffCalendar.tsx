@@ -1,6 +1,6 @@
 import { addDays, addWeeks, format, isSameDay, startOfDay, startOfWeek } from 'date-fns'
 import { it } from 'date-fns/locale'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { Ban, CalendarOff, Check, ChevronLeft, ChevronRight, Plus, UserX, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'

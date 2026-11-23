@@ -1,4 +1,4 @@
-import { Reorder } from 'framer-motion'
+import { Reorder } from 'motion/react'
 import { Dumbbell, GripVertical, Plus, Search, Trash2, Video } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'

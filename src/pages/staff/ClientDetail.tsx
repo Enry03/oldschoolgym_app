@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { CalendarCheck, CheckCircle2, ClipboardList, FileHeart, PauseCircle, Plus, Receipt, StickyNote } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'

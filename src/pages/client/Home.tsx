@@ -1,5 +1,5 @@
 import { PushBanner } from '../../components/PushCard'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { AlertTriangle, Bell, CalendarPlus, ChevronRight, Dumbbell, Gift, LineChart, MessageCircle, Newspaper, Users } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Avatar, Badge, Card, IconButton, PhotoPlaceholder, Ring, SectionTitle, Skeleton } from '../../components/ui'

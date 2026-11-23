@@ -34,3 +34,10 @@ Per compiti piccoli o quando hai già il contesto, lavora direttamente senza sot
 - Le scritture sul database Supabase non passano dal connettore MCP: prepara un file .sql da incollare nel SQL Editor e salvalo in supabase/migrations col numero successivo.
 - Ogni nuovo account deve essere approvato dall'admin prima di usare l'app.
 - Non toccare altri progetti di Enrico su Vercel o Supabase.
+
+## Grafica e animazioni
+
+- Le animazioni usano il pacchetto `motion` (ex Framer Motion): importa da `motion/react`, mai da `framer-motion`. Prima di scrivere o rivedere un'animazione usa la skill `motion` (.claude/skills/motion, parti da best-practices/react.md). Rispetta sempre prefers-reduced-motion.
+- Quando si ritocca o rifà la grafica di una schermata usa la skill `unslop` (.claude/skills/unslop): audit, direzione, poi le passate in ordine. La direzione parte dallo stile della palestra (pugili anni '90, wrestling anni '80, Rocky, colori del logo), non da un template generico.
+- Non cambiare la grafica di propria iniziativa: Enrico dice cosa modificare.
+- Dettagli e licenze delle skill in .claude/skills/README.md.
