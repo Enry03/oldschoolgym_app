@@ -87,3 +87,31 @@
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
+
+/* Stampa / PDF della scheda (pagina /stampa/scheda/:id) */
+@page {
+  size: A4;
+  margin: 12mm;
+}
+@media print {
+  html,
+  body {
+    background: #fff !important;
+    color: #0b1730;
+    color-scheme: light;
+  }
+  .no-print,
+  [data-sonner-toaster] {
+    display: none !important;
+  }
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .print-page .exercise {
+    break-inside: avoid;
+  }
+  .print-page .day-title {
+    break-after: avoid;
+  }
+}

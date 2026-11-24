@@ -5,6 +5,7 @@ import { lazy, Suspense } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Avatar, Badge, Card, IconButton, SectionTitle, Skeleton, Stat } from '../../components/ui'
 import { useAuth } from '../../context/AuthContext'
+import { CLIENT_PREVIEW } from '../../layouts/Layouts'
 import { euro, fmtDate, fmtTime, greeting } from '../../lib/format'
 import { useAsync, useNotifications } from '../../lib/hooks'
 import { supabase } from '../../lib/supabase'
@@ -51,8 +52,8 @@ export default function StaffDashboard() {
         <IconButton aria-label="Notifiche" badge={unread} onClick={() => nav('/app/notifiche')}>
           <Bell className="size-5" />
         </IconButton>
-        <Link to="/app" className="hidden rounded-xl bg-white/5 px-3 py-2 text-xs font-semibold text-muted hover:text-cream sm:block">
-          Vista cliente
+        <Link to={CLIENT_PREVIEW} className="rounded-xl bg-white/5 px-3 py-2 text-xs font-semibold text-muted hover:text-cream">
+          Vedi vista cliente
         </Link>
       </div>
 

@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
 import { Badge, Button, Card, Empty, Field, Input, Loading, PageHeader, SectionTitle, Segmented, Select, Sheet, Skeleton, Stat, Textarea, Toggle } from '../../components/ui'
 import { useAuth } from '../../context/AuthContext'
+import { CLIENT_PREVIEW } from '../../layouts/Layouts'
 import { downloadCsv, euro, fmtDate, fmtRelative, isoDate, methodLabel } from '../../lib/format'
 import { useAsync } from '../../lib/hooks'
 import { errMsg, supabase } from '../../lib/supabase'
@@ -28,7 +29,7 @@ export function More() {
     { to: '/staff/export', icon: Download, label: 'Export per il commercialista', show: isFront },
     { to: '/staff/impostazioni', icon: Settings, label: 'Impostazioni palestra', show: isAdmin },
     { to: '/staff/registro', icon: History, label: 'Registro attività', show: isAdmin },
-    { to: '/app', icon: Users, label: 'Vista cliente (la mia app)', show: true },
+    { to: CLIENT_PREVIEW, icon: Users, label: 'Vedi vista cliente', show: true },
   ].filter((i) => i.show)
   return (
     <div>

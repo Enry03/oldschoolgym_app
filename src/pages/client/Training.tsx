@@ -1,8 +1,9 @@
 import { AnimatePresence, m } from 'motion/react'
-import { Check, ChevronDown, ClipboardList, Dumbbell, ImagePlus, Lock, Pause, Play, Plus, Target, Timer, Trash2 } from 'lucide-react'
+import { Check, ChevronDown, FileDown, ClipboardList, Dumbbell, ImagePlus, Lock, Pause, Play, Plus, Target, Timer, Trash2 } from 'lucide-react'
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
+import { ExerciseDetails, ExerciseThumb } from '../../components/ExerciseMedia'
 import { Badge, Button, Card, Empty, Field, Input, Loading, PageHeader, SectionTitle, Segmented, Select, Sheet, Skeleton, Stat } from '../../components/ui'
 import { useAuth } from '../../context/AuthContext'
 import { fmtDate, isoDate } from '../../lib/format'
@@ -38,7 +39,7 @@ export default function Training() {
 function PlanTab() {
   const { profile } = useAuth()
   const { data: plans, loading } = useAsync(async () => {
-    const { data } = await supabase.from('workout_plans').select('*, workout_plan_items(*)').eq('user_id', profile!.id).eq('is_active', true).order('created_at', { ascending: false })
+    const { data } = await supabase.from('workout_plans').select('*, workout_plan_items(*, exercises(images, video_url, description, equipment))').eq('user_id', profile!.id).eq('is_active', true).order('created_at', { ascending: false })
     return (data as WorkoutPlan[]) ?? []
   }, [profile?.id])
   const { data: logs, reload: reloadLogs } = useAsync(async () => {
@@ -83,8 +84,15 @@ function PlanTab() {
           <Badge tone="gold">{plan?.goal ?? 'Scheda personale'}</Badge>
           <h2 className="mt-2 text-xl font-semibold leading-tight">{plan?.title}</h2>
           {plan?.notes && <p className="mt-2 text-sm text-cream/80">{plan.notes}</p>}
-          <div className="mt-3 text-xs text-muted">
-            Dal {fmtDate(plan?.starts_on)} {plan?.ends_on ? `al ${fmtDate(plan.ends_on)}` : ''}
+          <div className="mt-3 flex items-center justify-between gap-3 text-xs text-muted">
+            <span>
+              Dal {fmtDate(plan?.starts_on)} {plan?.ends_on ? `al ${fmtDate(plan.ends_on)}` : ''}
+            </span>
+            {plan && (
+              <Link to={`/stampa/scheda/${plan.id}`} className="inline-flex items-center gap-1.5 rounded-lg bg-white/5 px-2.5 py-1.5 font-semibold text-cream hover:text-gold">
+                <FileDown className="size-3.5" /> PDF
+              </Link>
+            )}
           </div>
         </div>
       </m.div>
@@ -104,7 +112,10 @@ function PlanTab() {
           const done = doneToday.has(it.id)
           return (
             <m.button key={it.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0, transition: { delay: Math.min(i, 6) * 0.03, duration: 0.2 } }} whileTap={{ scale: 0.98 }} onClick={() => setLogItem(it)} className={`card flex w-full items-center gap-4 p-4 text-left ${done ? 'border-success/50' : ''}`}>
-              <div className={`grid size-9 shrink-0 place-items-center rounded-lg text-sm font-semibold tabular-nums ${done ? 'bg-success text-ink' : 'bg-white/5 text-muted'}`}>{done ? <Check className="size-4" /> : i + 1}</div>
+              <div className="relative shrink-0">
+                <ExerciseThumb media={it.exercises} className="size-14" />
+                <span className={`absolute -left-1.5 -top-1.5 grid size-6 place-items-center rounded-md text-xs font-semibold tabular-nums ${done ? 'bg-success text-ink' : 'bg-night text-cream'}`}>{done ? <Check className="size-3.5" /> : i + 1}</span>
+              </div>
               <div className="min-w-0 flex-1">
                 <div className="font-semibold">{it.exercise_name}</div>
                 <div className="mt-0.5 text-sm text-muted">
@@ -189,6 +200,7 @@ function LogSheet({ item, onClose, logs, onSaved }: { item: WorkoutItem | null; 
     <Sheet open={!!item} onClose={onClose} title={item?.exercise_name} footer={<Button block size="lg" loading={busy} onClick={save}>Salva allenamento</Button>}>
       {item && (
         <div className="space-y-4">
+          <ExerciseDetails media={item.exercises} name={item.exercise_name} />
           <div className="flex flex-wrap gap-2">
             <Badge tone="gold">{item.sets} serie</Badge>
             <Badge tone="blue">{item.reps} ripetizioni</Badge>

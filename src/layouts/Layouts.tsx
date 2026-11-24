@@ -287,15 +287,39 @@ const clientItems: NavItem[] = [
   { to: '/app/profilo', label: 'Profilo', icon: User },
 ]
 
+// Lo staff vede l'app dei clienti solo se lo chiede dal pulsante "Vedi vista cliente" (link a CLIENT_PREVIEW);
+// la scelta resta finché non torna al pannello o chiude la scheda del browser.
+export const CLIENT_PREVIEW = '/app?anteprima=1'
+const PREVIEW_KEY = 'osg-client-preview'
+function previewOn() {
+  try {
+    return sessionStorage.getItem(PREVIEW_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+function setPreview(on: boolean) {
+  try {
+    if (on) sessionStorage.setItem(PREVIEW_KEY, '1')
+    else sessionStorage.removeItem(PREVIEW_KEY)
+  } catch {
+    /* archiviazione non disponibile: si torna semplicemente al pannello */
+  }
+}
+
 export function ClientLayout() {
   const { isStaff } = useAuth()
+  const loc = useLocation()
+  const asked = new URLSearchParams(loc.search).get('anteprima') === '1'
+  if (asked) setPreview(true)
   usePrefetch([() => import('../pages/client/Home'), () => import('../pages/client/Calendar'), () => import('../pages/client/Training'), () => import('../pages/client/Enter'), () => import('../pages/client/Profile')])
+  if (isStaff && !asked && !previewOn()) return <Navigate to="/staff" replace />
   return (
     <div className="relative mx-auto min-h-dvh max-w-lg">
       <main className="safe-top relative z-10 px-4 pb-32 pt-4">
         {isStaff && (
-          <NavLink to="/staff" className="mb-3 flex items-center justify-center gap-2 rounded-xl bg-gold/10 py-2 text-xs font-semibold text-gold">
-            <LayoutDashboard className="size-3.5" /> Torna al pannello staff
+          <NavLink to="/staff" onClick={() => setPreview(false)} className="mb-3 flex items-center justify-center gap-2 rounded-xl bg-gold/10 py-2 text-xs font-semibold text-gold">
+            <LayoutDashboard className="size-3.5" /> Stai vedendo l'app come un cliente · Torna al pannello
           </NavLink>
         )}
         <PageTransition>
