@@ -153,7 +153,10 @@ export interface Exercise {
   description: string | null
   video_url: string | null
   image_url: string | null
+  images: string[]
 }
+
+export type ExerciseMedia = Pick<Exercise, 'images' | 'video_url' | 'description' | 'equipment'>
 
 export interface WorkoutPlan {
   id: string
@@ -182,6 +185,7 @@ export interface WorkoutItem {
   load_note: string | null
   notes: string | null
   sort: number
+  exercises?: ExerciseMedia | null
 }
 
 export interface WorkoutLog {

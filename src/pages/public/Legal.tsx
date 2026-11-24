@@ -91,7 +91,7 @@ export function CookieBanner() {
   }
   return (
     <AnimatePresence>
-      {show && pathname !== '/kiosk' && (
+      {show && pathname !== '/kiosk' && !pathname.startsWith('/stampa') && (
         <m.div
           initial={{ y: 40, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}

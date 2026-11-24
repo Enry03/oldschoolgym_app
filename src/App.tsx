@@ -18,6 +18,7 @@ const Enter = lazy(() => import('./pages/client/Enter'))
 const Kiosk = lazy(() => import('./pages/kiosk/Kiosk'))
 const Tablets = lazy(() => import('./pages/staff/Tablets'))
 const Profile = lazy(() => import('./pages/client/Profile'))
+const PrintPlan = lazy(() => import('./pages/PrintPlan'))
 const Social = {
   Notifications: lazy(() => import('./pages/client/Social').then((m) => ({ default: m.NotificationsPage }))),
   News: lazy(() => import('./pages/client/Social').then((m) => ({ default: m.NewsPage }))),
@@ -62,6 +63,7 @@ export default function App() {
             <Route path="/kiosk" element={<Kiosk />} />
 
             <Route element={<RequireAuth />}>
+              <Route path="/stampa/scheda/:id" element={<PrintPlan />} />
               <Route path="/app" element={<ClientLayout />}>
                 <Route index element={<ClientHome />} />
                 <Route path="calendario" element={<ClientCalendar />} />

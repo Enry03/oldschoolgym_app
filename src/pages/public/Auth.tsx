@@ -38,7 +38,6 @@ function PasswordInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
 
 export function Login() {
   const { session, isStaff, profile } = useAuth()
-  const nav = useNavigate()
   const loc = useLocation() as { state?: { from?: string } }
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -46,7 +45,9 @@ export function Login() {
   const [captcha, setCaptcha] = useState<string | null>(null)
   const [captchaReset, setCaptchaReset] = useState(0)
 
-  if (session && profile) return <Navigate to={loc.state?.from ?? (isStaff ? '/staff' : '/app')} replace />
+  // lo staff entra sempre nel pannello: la vista cliente si apre solo dal pulsante apposito
+  const from = loc.state?.from
+  if (session && profile) return <Navigate to={isStaff ? (from?.startsWith('/staff') ? from : '/staff') : (from ?? '/app')} replace />
 
   async function submit(e: React.FormEvent) {
     e.preventDefault()
@@ -56,7 +57,7 @@ export function Login() {
     setCaptchaReset((n) => n + 1)
     if (error) return toast.error(errMsg(error))
     toast.success('Bentornato')
-    nav(loc.state?.from ?? '/app', { replace: true })
+    // il reindirizzamento (pannello o app) avviene appena il profilo è caricato, vedi sopra
   }
 
   return (
