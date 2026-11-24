@@ -107,22 +107,38 @@ export function NewsPage() {
 }
 
 /* ---------- Messaggi ---------- */
+interface Conversation {
+  peer_id: string
+  last_body: string
+  last_at: string
+  last_mine: boolean
+  unread: number
+}
+
 export function MessagesPage() {
   const { profile, isStaff } = useAuth()
   const [params, setParams] = useSearchParams()
   const peerId = params.get('con')
-  const { data: contacts, loading } = useAsync(async () => {
+  const { data, loading } = useAsync(async () => {
+    const { data: cv } = await supabase.rpc('my_conversations')
+    const conv = new Map(((cv as Conversation[]) ?? []).map((c) => [c.peer_id, c]))
+    let list: StaffMember[]
     if (isStaff) {
-      // lo staff vede i clienti con cui ha conversazioni + i propri clienti
-      const { data: msgs } = await supabase.from('messages').select('sender_id, recipient_id').or(`sender_id.eq.${profile!.id},recipient_id.eq.${profile!.id}`).order('created_at', { ascending: false }).limit(300)
+      // lo staff vede chi gli ha scritto (o a cui ha scritto) + i propri clienti
       const uuid = /^[0-9a-f-]{36}$/i
-      const ids = [...new Set([...(msgs ?? []).flatMap((m) => [m.sender_id, m.recipient_id]), ...(peerId && uuid.test(peerId) ? [peerId] : [])].filter((x) => x !== profile!.id))]
+      const ids = [...new Set([...conv.keys(), ...(peerId && uuid.test(peerId) ? [peerId] : [])].filter((x) => x !== profile!.id))]
       const { data: mine } = await supabase.from('profiles').select('id, first_name, last_name, avatar_url, role').or(ids.length ? `id.in.(${ids.join(',')}),trainer_id.eq.${profile!.id}` : `trainer_id.eq.${profile!.id}`)
-      return (mine as StaffMember[]) ?? []
+      list = (mine as StaffMember[]) ?? []
+    } else {
+      const { data: st } = await supabase.rpc('get_staff')
+      list = (st as StaffMember[]) ?? []
     }
-    const { data } = await supabase.rpc('get_staff')
-    return (data as StaffMember[]) ?? []
+    // prima le conversazioni più recenti, poi (per il cliente) il proprio trainer
+    const rank = (c: StaffMember) => conv.get(c.id)?.last_at ?? (c.id === profile?.trainer_id ? '0001' : '')
+    list.sort((a, b) => rank(b).localeCompare(rank(a)))
+    return { list, conv }
   }, [profile?.id, peerId])
+  const contacts = data?.list
 
   const peer = contacts?.find((c) => c.id === peerId)
   if (peerId && peer) return <Chat peer={peer} onBack={() => setParams({})} />
@@ -139,11 +155,27 @@ export function MessagesPage() {
           {contacts.map((c, i) => (
             <M.button key={c.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0, transition: { delay: i * 0.04 } }} onClick={() => setParams({ con: c.id })} className="card flex w-full items-center gap-3 p-3 text-left">
               <Avatar p={c} size={48} />
-              <div className="flex-1">
-                <div className="font-semibold">{fullName(c)}</div>
-                <div className="text-xs text-muted">{roleLabel[c.role]}</div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-baseline gap-2">
+                  <span className="truncate font-semibold">{fullName(c)}</span>
+                  <span className="shrink-0 text-xs text-muted">{c.id === profile?.trainer_id ? 'Il tuo trainer' : roleLabel[c.role]}</span>
+                </div>
+                {data?.conv.get(c.id) ? (
+                  <div className={`truncate text-sm ${data.conv.get(c.id)!.unread ? 'font-semibold text-cream' : 'text-muted'}`}>
+                    {data.conv.get(c.id)!.last_mine ? 'Tu: ' : ''}
+                    {data.conv.get(c.id)!.last_body}
+                  </div>
+                ) : (
+                  <div className="text-sm text-muted">Scrivi un messaggio</div>
+                )}
               </div>
-              <MessageCircle className="size-5 text-gold" />
+              {data?.conv.get(c.id)?.unread ? (
+                <span className="grid min-w-6 place-items-center rounded-full bg-gold px-1.5 text-xs font-bold text-ink" aria-label={`${data.conv.get(c.id)!.unread} non letti`}>
+                  {data.conv.get(c.id)!.unread}
+                </span>
+              ) : (
+                <MessageCircle className="size-5 text-gold" aria-hidden />
+              )}
             </M.button>
           ))}
         </div>
@@ -184,7 +216,9 @@ function Chat({ peer, onBack }: { peer: StaffMember; onBack: () => void }) {
     }
   }, [me, peer.id])
 
-  useEffect(() => endRef.current?.scrollIntoView({ behavior: 'smooth' }), [msgs.length])
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [msgs.length])
 
   async function send(e: React.FormEvent) {
     e.preventDefault()
@@ -194,7 +228,11 @@ function Chat({ peer, onBack }: { peer: StaffMember; onBack: () => void }) {
     const optimistic: Message = { id: crypto.randomUUID(), sender_id: me, recipient_id: peer.id, body, read_at: null, created_at: new Date().toISOString() }
     setMsgs((m) => [...m, optimistic])
     const { error } = await supabase.from('messages').insert({ sender_id: me, recipient_id: peer.id, body })
-    if (error) toast.error(errMsg(error))
+    if (error) {
+      setMsgs((m) => m.filter((x) => x.id !== optimistic.id))
+      setText(body)
+      toast.error(errMsg(error))
+    }
   }
 
   return (

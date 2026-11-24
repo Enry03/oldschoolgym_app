@@ -100,6 +100,7 @@ export default function App() {
                 <Route path="impostazioni" element={<SettingsPage />} />
                 <Route path="registro" element={<AuditPage />} />
                 <Route path="messaggi" element={<Social.Messages />} />
+                <Route path="notifiche" element={<Social.Notifications />} />
               </Route>
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />

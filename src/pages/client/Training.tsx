@@ -1,19 +1,20 @@
 import { AnimatePresence, m } from 'motion/react'
-import { Check, ChevronDown, FileDown, ClipboardList, Dumbbell, ImagePlus, Lock, Pause, Play, Plus, Target, Timer, Trash2 } from 'lucide-react'
+import { Award, Check, ClipboardList, Dumbbell, FileDown, ImagePlus, Lock, Pause, Play, Plus, Target, Timer, Trash2, Trophy, Users } from 'lucide-react'
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { ExerciseDetails, ExerciseThumb } from '../../components/ExerciseMedia'
 import { Badge, Button, Card, Empty, Field, Input, Loading, PageHeader, SectionTitle, Segmented, Select, Sheet, Skeleton, Stat } from '../../components/ui'
+import { BADGES } from '../../lib/badges'
 import { useAuth } from '../../context/AuthContext'
 import { fmtDate, isoDate } from '../../lib/format'
 import { useAsync } from '../../lib/hooks'
 import { errMsg, signedUrl, supabase } from '../../lib/supabase'
-import type { Goal, Measurement, WorkoutItem, WorkoutLog, WorkoutPlan } from '../../lib/types'
+import type { Goal, Measurement, PersonalRecord, ProgressPhoto, UserBadge, WorkoutItem, WorkoutLog, WorkoutPlan } from '../../lib/types'
 
 const Charts = lazy(() => import('../../components/Charts'))
 
-type Tab = 'scheda' | 'progressi'
+type Tab = 'scheda' | 'progressi' | 'traguardi'
 
 export default function Training() {
   const [params, setParams] = useSearchParams()
@@ -27,10 +28,11 @@ export default function Training() {
         options={[
           { value: 'scheda', label: 'Scheda' },
           { value: 'progressi', label: 'Progressi' },
+          { value: 'traguardi', label: 'Traguardi' },
         ]}
         className="mb-5"
       />
-      {tab === 'scheda' ? <PlanTab /> : <ProgressTab />}
+      {tab === 'scheda' ? <PlanTab /> : tab === 'progressi' ? <ProgressTab /> : <BadgesGrid />}
     </div>
   )
 }
@@ -170,28 +172,53 @@ function RestTimer({ seconds }: { seconds: number }) {
 function LogSheet({ item, onClose, logs, onSaved }: { item: WorkoutItem | null; onClose: () => void; logs: WorkoutLog[]; onSaved: () => void }) {
   const { profile } = useAuth()
   const [sets, setSets] = useState<{ weight: string; reps: string }[]>([])
+  const [note, setNote] = useState('')
   const [busy, setBusy] = useState(false)
+  const today = isoDate()
   useEffect(() => {
     if (!item) return
     const lastDay = logs.find((l) => l.plan_item_id === item.id)?.performed_on
     const prev = logs.filter((l) => l.plan_item_id === item.id && l.performed_on === lastDay)
-    setSets(Array.from({ length: item.sets }, (_, i) => ({ weight: prev[i]?.weight_kg?.toString() ?? '', reps: prev[i]?.reps?.toString() ?? item.reps.replace(/\D.*/, '') })))
-  }, [item, logs])
+    setSets(Array.from({ length: Math.max(item.sets, prev.length) }, (_, i) => ({ weight: prev[i]?.weight_kg?.toString() ?? '', reps: prev[i]?.reps?.toString() ?? item.reps.replace(/\D.*/, '') })))
+    setNote(lastDay === today ? (prev.find((l) => l.note)?.note ?? '') : '')
+  }, [item, logs, today])
   const history = item ? logs.filter((l) => l.plan_item_id === item.id) : []
   const byDay = history.reduce<Record<string, WorkoutLog[]>>((acc, l) => ((acc[l.performed_on] ??= []).push(l), acc), {})
+  const sameName = (l: WorkoutLog) => item && l.exercise_name.trim().toLowerCase() === item.exercise_name.trim().toLowerCase()
+  const best = Math.max(0, ...logs.filter((l) => sameName(l) && l.performed_on < today && l.weight_kg != null).map((l) => Number(l.weight_kg)))
+  const doneToday = history.some((l) => l.performed_on === today)
 
+  const num = (v: string) => (v.trim() ? Number(v.replace(',', '.')) : null)
   async function save() {
     if (!item || !profile) return
     const rows = sets
-      .map((s, i) => ({ user_id: profile.id, plan_item_id: item.id, exercise_name: item.exercise_name, performed_on: isoDate(), set_number: i + 1, weight_kg: s.weight ? Number(s.weight.replace(',', '.')) : null, reps: s.reps ? Number(s.reps) : null }))
+      .map((s, i) => ({ user_id: profile.id, plan_item_id: item.id, exercise_name: item.exercise_name, performed_on: today, set_number: i + 1, weight_kg: num(s.weight), reps: num(s.reps), note: null as string | null }))
       .filter((r) => r.weight_kg != null || r.reps != null)
     if (!rows.length) return toast.error('Inserisci almeno una serie')
+    if (rows.some((r) => (r.weight_kg != null && !(r.weight_kg >= 0 && r.weight_kg <= 1000)) || (r.reps != null && !(Number.isInteger(r.reps) && r.reps >= 0 && r.reps <= 1000))))
+      return toast.error('Controlla i numeri: kg tra 0 e 1000, ripetizioni intere')
+    rows[0].note = note.trim().slice(0, 500) || null
     setBusy(true)
-    await supabase.from('workout_logs').delete().eq('user_id', profile.id).eq('plan_item_id', item.id).eq('performed_on', isoDate())
-    const { error } = await supabase.from('workout_logs').insert(rows)
+    const del = await supabase.from('workout_logs').delete().eq('user_id', profile.id).eq('plan_item_id', item.id).eq('performed_on', today)
+    const { error } = del.error ? del : await supabase.from('workout_logs').insert(rows)
+    if (error) {
+      setBusy(false)
+      return toast.error(errMsg(error))
+    }
+    const { data: rec } = await supabase.from('personal_records').select('weight_kg, previous_kg').eq('user_id', profile.id).eq('exercise_key', item.exercise_name.trim().toLowerCase()).eq('achieved_on', today).maybeSingle()
+    setBusy(false)
+    if (rec) toast.success(`Nuovo record personale: ${rec.weight_kg} kg 🏆`, { description: rec.previous_kg != null ? `Prima era ${rec.previous_kg} kg` : undefined })
+    else toast.success('Serie salvate')
+    onSaved()
+    onClose()
+  }
+  async function clearToday() {
+    if (!item || !profile) return
+    setBusy(true)
+    const { error } = await supabase.from('workout_logs').delete().eq('user_id', profile.id).eq('plan_item_id', item.id).eq('performed_on', today)
     setBusy(false)
     if (error) return toast.error(errMsg(error))
-    toast.success('Serie salvate')
+    toast.success('Serie di oggi cancellate')
     onSaved()
     onClose()
   }
@@ -205,6 +232,11 @@ function LogSheet({ item, onClose, logs, onSaved }: { item: WorkoutItem | null; 
             <Badge tone="gold">{item.sets} serie</Badge>
             <Badge tone="blue">{item.reps} ripetizioni</Badge>
             {item.load_note && <Badge>{item.load_note}</Badge>}
+            {best > 0 && (
+              <Badge tone="green">
+                <Trophy className="size-3" /> Record {best} kg
+              </Badge>
+            )}
           </div>
           {item.rest_sec ? <RestTimer seconds={item.rest_sec} /> : null}
           <div className="space-y-2">
@@ -219,6 +251,14 @@ function LogSheet({ item, onClose, logs, onSaved }: { item: WorkoutItem | null; 
               <Plus className="size-4" /> Aggiungi serie
             </button>
           </div>
+          <Field label="Nota per il trainer (facoltativa)">
+            <Input value={note} maxLength={500} placeholder="Es. fastidio alla spalla, ultima serie a cedimento" onChange={(e) => setNote(e.target.value)} />
+          </Field>
+          {doneToday && (
+            <button type="button" disabled={busy} onClick={clearToday} className="flex items-center gap-1 text-sm text-muted hover:text-danger">
+              <Trash2 className="size-4" /> Cancella le serie di oggi
+            </button>
+          )}
           {Object.keys(byDay).length > 0 && (
             <div>
               <div className="label mb-2">Storico</div>
@@ -264,6 +304,10 @@ export function ProgressTab({ userId, readOnly }: { userId?: string; readOnly?: 
   const { data: logs } = useAsync(async () => {
     const { data } = await supabase.from('workout_logs').select('exercise_name, performed_on, weight_kg').eq('user_id', uid!).not('weight_kg', 'is', null).order('performed_on')
     return (data as Pick<WorkoutLog, 'exercise_name' | 'performed_on' | 'weight_kg'>[]) ?? []
+  }, [uid])
+  const { data: records } = useAsync(async () => {
+    const { data } = await supabase.from('personal_records').select('*').eq('user_id', uid!).order('achieved_on', { ascending: false }).limit(30)
+    return (data as PersonalRecord[]) ?? []
   }, [uid])
   const [open, setOpen] = useState(false)
   const [metric, setMetric] = useState<keyof Measurement>('weight_kg')
@@ -342,8 +386,9 @@ export function ProgressTab({ userId, readOnly }: { userId?: string; readOnly?: 
         </>
       )}
 
+      {(records ?? []).length > 0 && <RecordsBlock records={records!} />}
       {isMe && !readOnly && <GoalsBlock />}
-      {isMe && !readOnly && <PhotosBlock />}
+      {isMe && !readOnly ? <PhotosBlock /> : <SharedPhotos userId={uid!} />}
 
       <MeasureSheet open={open} onClose={() => setOpen(false)} userId={uid!} onSaved={reload} />
     </div>
@@ -438,16 +483,20 @@ function GoalsBlock() {
   )
 }
 
+async function withUrls(rows: ProgressPhoto[]) {
+  return Promise.all(rows.map(async (r) => ({ ...r, url: await signedUrl('progress', r.file_path) })))
+}
+
 function PhotosBlock() {
   const { profile } = useAuth()
   const [busy, setBusy] = useState(false)
   const { data: photos, reload } = useAsync(async () => {
-    const { data } = await supabase.from('progress_photos').select('*').eq('user_id', profile!.id).order('taken_on', { ascending: false })
-    const rows = (data as { id: string; file_path: string; taken_on: string }[]) ?? []
-    return Promise.all(rows.map(async (r) => ({ ...r, url: await signedUrl('progress', r.file_path) })))
+    const { data } = await supabase.from('progress_photos').select('*').eq('user_id', profile!.id).order('taken_on', { ascending: false }).order('created_at', { ascending: false })
+    return withUrls((data as ProgressPhoto[]) ?? [])
   }, [profile?.id])
 
   async function upload(file: File) {
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) return toast.error('Formato non supportato: usa JPG, PNG o WebP')
     if (file.size > 10 * 1024 * 1024) return toast.error('Foto troppo grande (max 10 MB)')
     setBusy(true)
     const ext = file.type === 'image/png' ? 'png' : file.type === 'image/webp' ? 'webp' : 'jpg'
@@ -457,14 +506,25 @@ function PhotosBlock() {
       setBusy(false)
       return toast.error(errMsg(up.error))
     }
-    await supabase.from('progress_photos').insert({ user_id: profile!.id, file_path: path })
+    const { error } = await supabase.from('progress_photos').insert({ user_id: profile!.id, file_path: path })
     setBusy(false)
-    toast.success('Foto salvata (visibile solo a te)')
+    if (error) {
+      await supabase.storage.from('progress').remove([path])
+      return toast.error(errMsg(error))
+    }
+    toast.success('Foto salvata (la vedi solo tu)')
     reload()
   }
-  async function remove(id: string, path: string) {
-    await supabase.storage.from('progress').remove([path])
-    await supabase.from('progress_photos').delete().eq('id', id)
+  async function remove(p: ProgressPhoto) {
+    const { error } = await supabase.from('progress_photos').delete().eq('id', p.id)
+    if (error) return toast.error(errMsg(error))
+    await supabase.storage.from('progress').remove([p.file_path])
+    reload()
+  }
+  async function toggleShare(p: ProgressPhoto) {
+    const { error } = await supabase.from('progress_photos').update({ shared_with_coach: !p.shared_with_coach }).eq('id', p.id)
+    if (error) return toast.error(errMsg(error))
+    toast.success(p.shared_with_coach ? 'Foto di nuovo privata' : 'Ora la vede anche il tuo trainer')
     reload()
   }
   return (
@@ -474,24 +534,153 @@ function PhotosBlock() {
           Foto progressi <Lock className="size-4 text-muted" />
         </span>
       </SectionTitle>
+      {(photos ?? []).length >= 2 && <BeforeAfter photos={photos!} />}
       <div className="grid grid-cols-3 gap-2">
         <label className="grid aspect-[3/4] cursor-pointer place-items-center rounded-2xl border-2 border-dashed border-line text-muted hover:border-gold hover:text-gold">
-          {busy ? <Dumbbell className="size-6 animate-spin" /> : <ImagePlus className="size-7" />}
-          <input type="file" accept="image/jpeg,image/png,image/webp" capture="environment" className="hidden" onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])} />
+          {busy ? <Dumbbell className="size-6 animate-spin motion-reduce:animate-none" /> : <ImagePlus className="size-7" />}
+          <span className="sr-only">Aggiungi foto</span>
+          <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" disabled={busy} onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) upload(f) }} />
         </label>
         {(photos ?? []).map((p) => (
-          <div key={p.id} className="group relative aspect-[3/4] overflow-hidden rounded-2xl bg-surface">
-            {p.url && <img src={p.url} alt="" className="size-full object-cover" loading="lazy" />}
+          <div key={p.id} className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-surface">
+            {p.url && <img src={p.url} alt={`Foto del ${fmtDate(p.taken_on)}`} className="size-full object-cover" loading="lazy" />}
             <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 p-1.5 text-[10px]">{fmtDate(p.taken_on, 'd MMM yy')}</span>
-            <button onClick={() => remove(p.id, p.file_path)} aria-label="Elimina foto" className="absolute right-1.5 top-1.5 grid size-7 place-items-center rounded-full bg-black/60 text-white">
+            <button onClick={() => toggleShare(p)} aria-pressed={p.shared_with_coach} aria-label={p.shared_with_coach ? 'Condivisa con il trainer: rendi privata' : 'Condividi con il trainer'} className={`absolute left-1.5 top-1.5 grid size-7 place-items-center rounded-full ${p.shared_with_coach ? 'bg-gold text-ink' : 'bg-black/60 text-white'}`}>
+              <Users className="size-3.5" />
+            </button>
+            <button onClick={() => remove(p)} aria-label="Elimina foto" className="absolute right-1.5 top-1.5 grid size-7 place-items-center rounded-full bg-black/60 text-white">
               <Trash2 className="size-3.5" />
             </button>
           </div>
         ))}
       </div>
-      <p className="mt-2 flex items-center gap-1 text-xs text-muted">
-        <ChevronDown className="size-3" /> Le foto sono private: nemmeno lo staff può vederle.
+      <p className="mt-2 text-xs text-muted">
+        Le foto sono private. Tocca <Users className="inline size-3" /> su una foto per farla vedere al tuo trainer, e di nuovo per toglierla.
       </p>
     </>
+  )
+}
+
+function SharedPhotos({ userId }: { userId: string }) {
+  const { data: photos } = useAsync(async () => {
+    const { data } = await supabase.from('progress_photos').select('*').eq('user_id', userId).order('taken_on', { ascending: false })
+    return withUrls((data as ProgressPhoto[]) ?? [])
+  }, [userId])
+  return (
+    <>
+      <SectionTitle>Foto condivise dal cliente</SectionTitle>
+      {!(photos ?? []).length ? (
+        <p className="card p-4 text-sm text-muted">Nessuna foto condivisa. Le foto restano private finché il cliente non sceglie di mostrartele.</p>
+      ) : (
+        <>
+          {photos!.length >= 2 && <BeforeAfter photos={photos!} />}
+          <div className="grid grid-cols-3 gap-2">
+            {photos!.map((p) => (
+              <div key={p.id} className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-surface">
+                {p.url && <img src={p.url} alt={`Foto del ${fmtDate(p.taken_on)}`} className="size-full object-cover" loading="lazy" />}
+                <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 p-1.5 text-[10px]">{fmtDate(p.taken_on, 'd MMM yy')}</span>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+    </>
+  )
+}
+
+/** Confronto prima/dopo: di base la foto più vecchia e la più recente */
+function BeforeAfter({ photos }: { photos: ProgressPhoto[] }) {
+  const sorted = useMemo(() => [...photos].sort((a, b) => a.taken_on.localeCompare(b.taken_on) || (a.created_at ?? '').localeCompare(b.created_at ?? '')), [photos])
+  const [a, setA] = useState(sorted[0].id)
+  const [b, setB] = useState(sorted[sorted.length - 1].id)
+  const pa = sorted.find((p) => p.id === a) ?? sorted[0]
+  const pb = sorted.find((p) => p.id === b) ?? sorted[sorted.length - 1]
+  const days = Math.round((new Date(pb.taken_on).getTime() - new Date(pa.taken_on).getTime()) / 86400000)
+  const pick = (value: string, set: (v: string) => void, label: string) => (
+    <Select aria-label={label} value={value} onChange={(e) => set(e.target.value)} className="mt-2 text-xs">
+      {sorted.map((p, i) => (
+        <option key={p.id} value={p.id}>
+          {fmtDate(p.taken_on, 'd MMM yyyy')} {sorted.filter((x) => x.taken_on === p.taken_on).length > 1 ? `(${i + 1})` : ''}
+        </option>
+      ))}
+    </Select>
+  )
+  return (
+    <Card className="mb-3 p-3">
+      <div className="mb-2 flex items-center justify-between text-sm">
+        <span className="font-semibold">Prima e dopo</span>
+        {days > 0 && <span className="text-xs text-muted">{days} giorni di differenza</span>}
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        {[{ p: pa, v: a, set: setA, l: 'Prima' }, { p: pb, v: b, set: setB, l: 'Dopo' }].map(({ p, v, set, l }) => (
+          <div key={l}>
+            <div className="relative aspect-[3/4] overflow-hidden rounded-xl bg-surface">
+              {p.url && <img src={p.url} alt={`${l}: ${fmtDate(p.taken_on)}`} className="size-full object-cover" />}
+              <span className="absolute left-1.5 top-1.5 rounded-md bg-black/70 px-2 py-0.5 text-[11px] font-semibold">{l}</span>
+            </div>
+            {pick(v, set, `Foto ${l.toLowerCase()}`)}
+          </div>
+        ))}
+      </div>
+    </Card>
+  )
+}
+
+function RecordsBlock({ records }: { records: PersonalRecord[] }) {
+  // un solo record per esercizio: il più alto (cioè il più recente)
+  const best = [...new Map(records.map((r) => [r.exercise_key, r])).values()]
+  return (
+    <>
+      <SectionTitle>
+        <span className="flex items-center gap-2">
+          Record personali <Trophy className="size-4 text-gold" />
+        </span>
+      </SectionTitle>
+      <div className="card divide-y divide-line/50 p-0">
+        {best.slice(0, 8).map((r) => (
+          <div key={r.exercise_key} className="flex items-center gap-3 p-3">
+            <div className="min-w-0 flex-1">
+              <div className="truncate text-sm font-semibold">{r.exercise_name}</div>
+              <div className="text-xs text-muted">
+                {fmtDate(r.achieved_on, 'd MMM yyyy')}
+                {r.previous_kg != null && ` · prima ${r.previous_kg} kg`}
+              </div>
+            </div>
+            <div className="font-display text-xl tabular-nums">{r.weight_kg} kg</div>
+          </div>
+        ))}
+      </div>
+    </>
+  )
+}
+
+/* ================= TRAGUARDI ================= */
+export function BadgesGrid({ userId }: { userId?: string }) {
+  const { profile } = useAuth()
+  const uid = userId ?? profile?.id
+  const { data: earned, loading } = useAsync(async () => {
+    const { data } = await supabase.from('user_badges').select('*').eq('user_id', uid!)
+    return new Map(((data as UserBadge[]) ?? []).map((b) => [b.code, b.earned_at]))
+  }, [uid])
+  if (loading || !earned) return <Loading rows={2} />
+  const n = BADGES.filter((b) => earned.has(b.code)).length
+  return (
+    <div>
+      {!userId && <p className="mb-3 text-sm text-muted">Si sbloccano da soli con gli ingressi, il diario e i record. Ne hai {n} su {BADGES.length}.</p>}
+      {userId && <SectionTitle>Traguardi ({n}/{BADGES.length})</SectionTitle>}
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+        {BADGES.map((b, i) => {
+          const at = earned.get(b.code)
+          return (
+            <m.div key={b.code} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0, transition: { delay: Math.min(i, 8) * 0.03 } }} className={`rounded-2xl border p-3 ${at ? 'border-gold/50 bg-gold/10' : 'border-line/40 bg-surface/40 opacity-60'}`}>
+              <Award className={`size-6 ${at ? 'text-gold' : 'text-muted'}`} aria-hidden />
+              <div className="mt-2 text-sm font-semibold leading-tight">{b.title}</div>
+              <div className="mt-0.5 text-xs text-muted">{b.desc}</div>
+              <div className="mt-1.5 text-[11px] font-medium">{at ? <span className="text-gold">Sbloccato il {fmtDate(at, 'd MMM yyyy')}</span> : <span className="text-muted">Da sbloccare</span>}</div>
+            </m.div>
+          )
+        })}
+      </div>
+    </div>
   )
 }

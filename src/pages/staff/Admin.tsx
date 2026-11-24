@@ -737,10 +737,16 @@ export function SettingsPage() {
           <Field label="Capienza sala">
             <Input inputMode="numeric" value={f.max_capacity} onChange={(e) => set('max_capacity', Number(e.target.value) || 1)} />
           </Field>
-          <Field label="Inattivo dopo gg">
-            <Input inputMode="numeric" value={f.inactivity_days} onChange={(e) => set('inactivity_days', Number(e.target.value) || 7)} />
+          <Field label="Assente dopo gg">
+            <Input inputMode="numeric" value={f.inactivity_days} onChange={(e) => set('inactivity_days', Math.min(90, Number(e.target.value) || 10))} />
           </Field>
         </div>
+        {f.plan_change_weeks != null && (
+          <Field label="Avviso cambio scheda dopo (settimane)" hint="Al trainer arriva l'avviso dopo queste settimane, al cliente 2 settimane dopo">
+            <Input inputMode="numeric" value={f.plan_change_weeks} onChange={(e) => set('plan_change_weeks', Math.max(2, Math.min(26, Number(e.target.value) || 6)))} />
+          </Field>
+        )}
+        <p className="text-xs text-muted">Chi non viene da più giorni di quelli indicati riceve un messaggio &quot;Ci manchi&quot; e il suo trainer (o l'admin) un avviso per richiamarlo.</p>
         <Toggle label="Blocca ingresso senza certificato valido" desc="Il check-in viene rifiutato se il certificato manca o è scaduto" checked={f.block_without_certificate} onChange={(v) => set('block_without_certificate', v)} />
       </Card>
       <Card className="mt-4 space-y-3">
