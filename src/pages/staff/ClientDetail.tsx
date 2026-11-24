@@ -8,13 +8,13 @@ import { useAuth } from '../../context/AuthContext'
 import { bookingLabel, euro, fmtDate, fmtRelative, fullName, isoDate, methodLabel, roleLabel } from '../../lib/format'
 import { useAsync } from '../../lib/hooks'
 import { errMsg, signedUrl, supabase } from '../../lib/supabase'
-import type { Certificate, Membership, Payment, PaymentMethod, Plan, Profile, StaffMember, WorkoutPlan } from '../../lib/types'
-import { MeasureSheet, ProgressTab } from '../client/Training'
+import type { Certificate, Membership, Payment, PaymentMethod, Plan, Profile, StaffMember, WorkoutLog, WorkoutPlan } from '../../lib/types'
+import { BadgesGrid, MeasureSheet, ProgressTab } from '../client/Training'
 import { statusBadge } from '../client/Membership'
 import { ContactButtons } from './Clients'
 import { PlanEditor } from './Workouts'
 
-type Tab = 'info' | 'abbonamento' | 'schede' | 'progressi' | 'presenze'
+type Tab = 'info' | 'abbonamento' | 'schede' | 'diario' | 'progressi' | 'presenze'
 
 export default function ClientDetail() {
   const { id } = useParams()
@@ -33,7 +33,8 @@ export default function ClientDetail() {
     { value: 'info', label: 'Scheda' },
     ...(isFront ? [{ value: 'abbonamento' as Tab, label: 'Abbonamento' }] : []),
     { value: 'schede', label: 'Allenamento' },
-    { value: 'progressi', label: 'Misure' },
+    { value: 'diario', label: 'Diario' },
+    { value: 'progressi', label: 'Progressi' },
     { value: 'presenze', label: 'Presenze' },
   ]
 
@@ -56,6 +57,7 @@ export default function ClientDetail() {
       {tab === 'info' && <InfoTab c={c} onChanged={reload} isAdmin={isAdmin} isFront={isFront} />}
       {tab === 'abbonamento' && <MembershipTab c={c} />}
       {tab === 'schede' && <PlansTab c={c} />}
+      {tab === 'diario' && <DiaryTab c={c} />}
       {tab === 'progressi' && <MeasuresTab c={c} />}
       {tab === 'presenze' && <AttendanceTab c={c} />}
     </div>
@@ -656,8 +658,66 @@ function MeasuresTab({ c }: { c: Profile }) {
       </Button>
       <div className="mt-2" key={k}>
         <ProgressTab userId={c.id} readOnly />
+        <div className="mt-4">
+          <BadgesGrid userId={c.id} />
+        </div>
       </div>
       <MeasureSheet open={open} onClose={() => setOpen(false)} userId={c.id} onSaved={() => setK(k + 1)} />
+    </div>
+  )
+}
+
+/* ---------- DIARIO ---------- */
+function DiaryTab({ c }: { c: Profile }) {
+  const { data, loading } = useAsync(async () => {
+    const [lg, pr] = await Promise.all([
+      supabase.from('workout_logs').select('*').eq('user_id', c.id).order('performed_on', { ascending: false }).order('exercise_name').order('set_number').limit(600),
+      supabase.from('personal_records').select('exercise_key, achieved_on').eq('user_id', c.id),
+    ])
+    return { logs: (lg.data as WorkoutLog[]) ?? [], records: new Set(((pr.data as { exercise_key: string; achieved_on: string }[]) ?? []).map((r) => `${r.exercise_key}|${r.achieved_on}`)) }
+  }, [c.id])
+  if (loading || !data) return <Loading />
+  if (!data.logs.length) return <Empty icon={<ClipboardList className="size-7" />} title="Diario vuoto" text="Quando il cliente segna pesi e ripetizioni sulla scheda li vedi qui, giorno per giorno." />
+  const days = new Map<string, Map<string, WorkoutLog[]>>()
+  data.logs.forEach((l) => {
+    const d = days.get(l.performed_on) ?? new Map<string, WorkoutLog[]>()
+    d.set(l.exercise_name, [...(d.get(l.exercise_name) ?? []), l])
+    days.set(l.performed_on, d)
+  })
+  const week = [...days.keys()].filter((d) => new Date(d) > new Date(Date.now() - 7 * 86400000)).length
+  return (
+    <div className="space-y-3">
+      <div className="grid grid-cols-2 gap-3">
+        <div className="card p-4">
+          <div className="label">Allenamenti segnati</div>
+          <div className="font-display text-4xl">{days.size}</div>
+        </div>
+        <div className="card p-4">
+          <div className="label">Ultimi 7 giorni</div>
+          <div className="font-display text-4xl">{week}</div>
+        </div>
+      </div>
+      {[...days.entries()].map(([d, exs]) => (
+        <Card key={d} className="p-0">
+          <div className="border-b border-line/50 px-3 py-2 text-sm font-semibold capitalize">{fmtDate(d, 'EEEE d MMMM')}</div>
+          <div className="divide-y divide-line/30">
+            {[...exs.entries()].map(([name, ls]) => {
+              const pr = data.records.has(`${name.trim().toLowerCase()}|${d}`)
+              const note = ls.find((l) => l.note)?.note
+              return (
+                <div key={name} className="px-3 py-2">
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="flex-1 font-medium">{name}</span>
+                    {pr && <Badge tone="gold">Record</Badge>}
+                  </div>
+                  <div className="mt-0.5 text-sm tabular-nums text-cream/80">{ls.map((l) => `${l.weight_kg ?? '–'} kg × ${l.reps ?? '–'}`).join('   ')}</div>
+                  {note && <div className="mt-1 text-xs text-gold/90">“{note}”</div>}
+                </div>
+              )
+            })}
+          </div>
+        </Card>
+      ))}
     </div>
   )
 }

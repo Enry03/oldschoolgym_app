@@ -49,6 +49,7 @@ export interface GymSettings {
   cancel_hours: number
   max_capacity: number
   inactivity_days: number
+  plan_change_weeks: number
   block_without_certificate: boolean
   rules_text: string
   rules_version: number
@@ -284,4 +285,30 @@ export interface Product {
   price_cents: number
   stock: number
   is_active: boolean
+}
+
+export interface PersonalRecord {
+  user_id: string
+  exercise_key: string
+  exercise_name: string
+  weight_kg: number
+  previous_kg: number | null
+  achieved_on: string
+}
+
+export interface UserBadge {
+  user_id: string
+  code: string
+  earned_at: string
+}
+
+export interface ProgressPhoto {
+  id: string
+  user_id: string
+  file_path: string
+  taken_on: string
+  note: string | null
+  shared_with_coach: boolean
+  created_at?: string
+  url?: string | null
 }

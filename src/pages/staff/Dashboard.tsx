@@ -1,6 +1,6 @@
 import { PushBanner } from '../../components/PushCard'
 import PendingSignups from '../../components/PendingSignups'
-import { AlertTriangle, Bell, CalendarClock, ChevronRight, FileWarning } from 'lucide-react'
+import { AlertTriangle, Bell, CalendarClock, ChevronRight, ClipboardList, FileWarning, Ticket, UserX } from 'lucide-react'
 import { lazy, Suspense } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Avatar, Badge, Card, IconButton, SectionTitle, Skeleton, Stat } from '../../components/ui'
@@ -49,7 +49,7 @@ export default function StaffDashboard() {
           {profile?.first_name && <div className="text-xs text-muted">{greeting()}</div>}
           <h1 className="truncate text-lg font-semibold leading-tight">{profile?.first_name || greeting()}</h1>
         </div>
-        <IconButton aria-label="Notifiche" badge={unread} onClick={() => nav('/app/notifiche')}>
+        <IconButton aria-label="Notifiche" badge={unread} onClick={() => nav('/staff/notifiche')}>
           <Bell className="size-5" />
         </IconButton>
         <Link to={CLIENT_PREVIEW} className="rounded-xl bg-white/5 px-3 py-2 text-xs font-semibold text-muted hover:text-cream">
@@ -99,6 +99,8 @@ export default function StaffDashboard() {
               </div>
             )
           })()}
+
+          <FollowUps />
 
           <div className="mt-2 grid gap-4 md:grid-cols-2">
             <div>
@@ -161,5 +163,59 @@ export default function StaffDashboard() {
         ))}
       </div>
     </div>
+  )
+}
+
+interface FollowPerson {
+  id: string
+  first_name: string
+  last_name: string
+  avatar_url: string | null
+}
+interface Followups {
+  absence_days: number
+  plan_weeks: number
+  absent: (FollowPerson & { days: number; ever: boolean })[]
+  plans: (FollowPerson & { plan_id: string; title: string; weeks: number })[]
+  entries: (FollowPerson & { entries_left: number; plan_name: string })[]
+}
+
+/** Clienti da seguire: assenti, schede da cambiare, ingressi finiti. Il trainer vede solo i suoi. */
+function FollowUps() {
+  const { data: f } = useAsync(async () => {
+    const { data, error } = await supabase.rpc('staff_followups')
+    if (error) throw error
+    return data as Followups
+  })
+  if (!f) return null
+  const rows = [
+    ...f.absent.map((p) => ({ key: `a${p.id}`, p, icon: UserX, text: p.ever ? `non viene da ${p.days} giorni` : `iscritto da ${p.days} giorni, mai venuto` })),
+    ...f.plans.map((p) => ({ key: `p${p.plan_id}`, p, icon: ClipboardList, text: `scheda "${p.title}" da ${p.weeks} settimane` })),
+    ...f.entries.map((p) => ({ key: `e${p.id}`, p, icon: Ticket, text: p.entries_left === 0 ? 'ingressi finiti' : `ancora ${p.entries_left} ${p.entries_left === 1 ? 'ingresso' : 'ingressi'}` })),
+  ]
+  return (
+    <>
+      <SectionTitle>Da seguire</SectionTitle>
+      {rows.length === 0 ? (
+        <p className="card p-4 text-sm text-muted">Tutto in ordine: nessun cliente assente da più di {f.absence_days} giorni, nessuna scheda più vecchia di {f.plan_weeks} settimane.</p>
+      ) : (
+        <div className="card divide-y divide-line/50 p-0">
+          {rows.slice(0, 12).map((r) => (
+            <Link key={r.key} to={`/staff/clienti/${r.p.id}`} className="flex items-center gap-3 p-3">
+              <Avatar p={r.p} size={32} />
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-sm font-semibold">
+                  {r.p.first_name} {r.p.last_name}
+                </div>
+                <div className="flex items-center gap-1 text-xs text-muted">
+                  <r.icon className="size-3.5 shrink-0" aria-hidden /> {r.text}
+                </div>
+              </div>
+              <ChevronRight className="size-4 text-muted" />
+            </Link>
+          ))}
+        </div>
+      )}
+    </>
   )
 }
